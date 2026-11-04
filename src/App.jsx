@@ -25,9 +25,10 @@ export default function App() {
   const data = useStore();
   const demo = [
     { label: 'Coach dashboard', href: '#/coach' },
-    { label: 'Mia · parent of a 10-year-old', href: '#/sms/mia-7kq' },
-    { label: 'Jordan · says S, no size on file', href: '#/sms/jordan-x2p' },
-    { label: 'Dana · same as last year', href: '#/sms/dana-a91' },
+    { label: 'Text from BSN · what athletes get', href: '#/sms/jordan-x2p' },
+    { label: 'Mia · parent of a 10-year-old', href: '#/r/mia-7kq' },
+    { label: 'Jordan · says S, no size on file', href: '#/r/jordan-x2p' },
+    { label: 'Dana · same as last year', href: '#/r/dana-a91' },
   ];
   return (
     <div className="stage">
@@ -40,7 +41,7 @@ export default function App() {
         </p>
         <nav className="demo-links" aria-label="Demo shortcuts">
           {demo.map((d) => (
-            <a key={d.href} href={d.href} className={`#${path}` === d.href || `#${path}`.replace('/r/', '/sms/').replace(/\/done.*/, '') === d.href ? 'on' : ''}>
+            <a key={d.href} href={d.href} className={`#${path}`.replace(/\/done.*/, '') === d.href ? 'on' : ''}>
               {d.label}
             </a>
           ))}
