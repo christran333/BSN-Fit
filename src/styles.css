@@ -322,6 +322,6 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .bubble.is-new { animation: bubble-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; transform-origin: bottom left; }
 @keyframes bubble-in { from { transform: scale(0.6) translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
 .demo-links a { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.demo-star { flex: none; color: var(--red); }
+.demo-star { flex: none; color: var(--red); margin-left: 5px; vertical-align: -1px; }
 .last-card.compact { padding: 10px 12px; gap: 12px; border-radius: 14px; }
 .last-card.compact .last-size { width: 42px; height: 42px; font-size: 22px; border-radius: 10px; }
