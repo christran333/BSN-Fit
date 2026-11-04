@@ -34,13 +34,18 @@ a { color: inherit; }
 
 /* ── stage + demo panel (laptop only) ───────────────────── */
 .stage {
-  min-height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 64px;
-  padding: 32px;
+  padding: 20px 32px;
 }
+/* the phone is laid out at 430×884 and scaled to fit the window height */
+.phone-fit { flex: none; position: relative; }
+.phone-fit > .phone { position: absolute; top: 0; left: 0; transform: scale(var(--s, 1)); transform-origin: top left; }
 .demo-panel { width: 280px; display: flex; flex-direction: column; gap: 14px; }
 .demo-kicker { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--red); }
 .demo-title { margin: 0; font-size: 56px; line-height: 0.9; }
@@ -79,7 +84,9 @@ a { color: inherit; }
 /* real phone: drop the frame, go full-screen */
 @media (max-width: 600px) {
   body { background: var(--bg); }
-  .stage { padding: 0; display: block; height: 100%; }
+  .stage { padding: 0; display: block; height: 100dvh; }
+  .phone-fit { width: 100% !important; height: 100dvh !important; }
+  .phone-fit > .phone { position: static; transform: none; }
   .demo-panel, .phone-island, .phone-status, .phone-url, .phone-home { display: none; }
   .phone { width: 100%; height: 100dvh; padding: 0; border-radius: 0; box-shadow: none; background: none; }
   .phone-screen { border-radius: 0; }
