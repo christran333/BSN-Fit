@@ -26,7 +26,7 @@ export default function PhoneFrame({ path, children }) {
   return (
     <div className="phone-fit" style={{ '--s': scale, width: PHONE_W * scale, height: PHONE_H * scale }}>
       <div className="phone">
-        <div className="phone-screen">
+        <div className={`phone-screen${path.startsWith('/sms') ? ' is-sms' : ''}`}>
           <div className="phone-island" aria-hidden="true" />
           <div className="phone-status" aria-hidden="true">
             <span>9:41</span>
@@ -41,13 +41,13 @@ export default function PhoneFrame({ path, children }) {
               <rect x="67" y="4.5" width="2" height="4" rx="1" fill="currentColor" />
             </svg>
           </div>
-          <div className="phone-url" aria-hidden="true">
+          {!path.startsWith('/sms') && <div className="phone-url" aria-hidden="true">
             <svg width="11" height="13" viewBox="0 0 11 13">
               <rect x="1" y="5.5" width="9" height="7" rx="1.5" fill="currentColor" />
               <path d="M3 5.5V4a2.5 2.5 0 0 1 5 0v1.5" stroke="currentColor" strokeWidth="1.4" fill="none" />
             </svg>
             fitcheck.team{path}
-          </div>
+          </div>}
           <div className="app">{children}</div>
           <div className="phone-home" aria-hidden="true" />
         </div>

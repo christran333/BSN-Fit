@@ -7,12 +7,14 @@ import AddPlayer from './screens/AddPlayer.jsx';
 import PlayerPage from './screens/PlayerPage.jsx';
 import FitCheck from './screens/FitCheck.jsx';
 import Result from './screens/Result.jsx';
+import Sms from './screens/Sms.jsx';
 
 function screenFor(path, data) {
   let m;
   if (path === '/coach' || path === '/') return <CoachDashboard data={data} />;
   if (path === '/coach/add') return <AddPlayer />;
   if ((m = path.match(/^\/coach\/p\/([^/]+)/))) return <PlayerPage data={data} id={m[1]} />;
+  if ((m = path.match(/^\/sms\/([^/]+)/))) return <Sms data={data} token={m[1]} />;
   if ((m = path.match(/^\/r\/([^/]+)\/done/))) return <Result data={data} token={m[1]} />;
   if ((m = path.match(/^\/r\/([^/]+)/))) return <FitCheck data={data} token={m[1]} />;
   return <CoachDashboard data={data} />;
@@ -23,9 +25,9 @@ export default function App() {
   const data = useStore();
   const demo = [
     { label: 'Coach dashboard', href: '#/coach' },
-    { label: 'Mia · parent of a 10-year-old', href: '#/r/mia-7kq' },
-    { label: 'Jordan · says S, no size on file', href: '#/r/jordan-x2p' },
-    { label: 'Dana · same as last year', href: '#/r/dana-a91' },
+    { label: 'Mia · parent of a 10-year-old', href: '#/sms/mia-7kq' },
+    { label: 'Jordan · says S, no size on file', href: '#/sms/jordan-x2p' },
+    { label: 'Dana · same as last year', href: '#/sms/dana-a91' },
   ];
   return (
     <div className="stage">
@@ -38,7 +40,7 @@ export default function App() {
         </p>
         <nav className="demo-links" aria-label="Demo shortcuts">
           {demo.map((d) => (
-            <a key={d.href} href={d.href} className={`#${path}` === d.href ? 'on' : ''}>
+            <a key={d.href} href={d.href} className={`#${path}` === d.href || `#${path}`.replace('/r/', '/sms/').replace(/\/done.*/, '') === d.href ? 'on' : ''}>
               {d.label}
             </a>
           ))}
