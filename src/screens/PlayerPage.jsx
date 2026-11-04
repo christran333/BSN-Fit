@@ -77,7 +77,7 @@ export default function PlayerPage({ data, id }) {
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                <span className="disp" style={{ fontSize: 40, lineHeight: 1 }}>{sizeLabel(p.finalSize, p.cut)}</span>
+                <span className="disp" style={{ fontSize: 30, lineHeight: 1.15 }}>{sizeLabel(p.finalSize, p.cut)}</span>
                 {p.lastSize === p.finalSize && <span style={{ fontSize: 13, color: 'var(--muted)' }}>same as last order</span>}
               </div>
             )}

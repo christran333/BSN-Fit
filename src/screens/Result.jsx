@@ -30,7 +30,7 @@ export default function Result({ data, token }) {
       <div className="screen">
         <div className="center-msg">
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={28} width={1.6} /></div>
-          <h1 className="disp" style={{ margin: 0, fontSize: 36 }}>You're all set</h1>
+          <h1 className="disp" style={{ margin: 0, fontSize: 28 }}>You're all set</h1>
           <p className="lede" style={{ maxWidth: 280 }}>{data.team.coach} has {isParent ? `${first}'s` : 'your'} size. You can close this tab.</p>
           <button className="lnk" onClick={() => setDone(false)}>Change something</button>
         </div>

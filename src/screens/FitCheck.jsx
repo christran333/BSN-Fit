@@ -35,7 +35,7 @@ export default function FitCheck({ data, token }) {
   const header = (
     <div>
       <div className="kicker">{head.kicker}</div>
-      <h1 className="disp" style={{ margin: '6px 0 0', fontSize: 32, lineHeight: 1.02 }}>{head.title}</h1>
+      <h1 className="disp" style={{ margin: '8px 0 0', fontSize: 26, lineHeight: 1.15 }}>{head.title}</h1>
       <p className="lede">{head.lede}</p>
     </div>
   );
