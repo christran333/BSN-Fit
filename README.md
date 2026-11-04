@@ -8,7 +8,7 @@ ATCM 4341 Experience Design, Fall 2026, with BSN Sports. Team: Chris Tran, Seulg
 
 ## Try it
 
-Once GitHub Pages is on (see below), open the site on a phone or laptop. On a laptop it shows inside a phone frame, with demo shortcuts on the left:
+Open the deployed site on a phone or laptop. On a laptop it shows inside a phone frame, with demo shortcuts on the left:
 
 | Link | Scenario |
 |---|---|
@@ -47,9 +47,9 @@ npm run dev      # then open the printed URL; --host also lets you open it on yo
 
 An LLM could later write the question wording or read the free-text notes. The size math stays rule-based, so every recommendation can be explained to the athlete and the coach.
 
-## Deploy (GitHub Pages)
+## Deploy (Vercel)
 
-Repo → **Settings → Pages → Source: GitHub Actions**. Every push to `main` then builds and publishes to `https://<user>.github.io/<repo>/`.
+Import the repo on vercel.com with the **Vite** preset (build `npm run build`, output `dist`). Every push to `main` redeploys automatically.
 
 ## Files
 
