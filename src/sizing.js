@@ -203,7 +203,7 @@ export function questionsFor(p) {
       },
       {
         id: 'lastFit',
-        label: `Last year's ${last} fit`,
+        label: `Last year's ${last} felt…`,
         default: 'right',
         compact: true,
         options: [
@@ -214,7 +214,7 @@ export function questionsFor(p) {
       },
       {
         id: 'pref',
-        label: 'You like it',
+        label: 'You like your jersey…',
         default: 'regular',
         compact: true,
         options: [
@@ -226,7 +226,7 @@ export function questionsFor(p) {
       { id: 'height', label: 'Height', default: p.heightBand || '68-72', compact: true, options: HEIGHT_BANDS },
       {
         id: 'length',
-        label: 'Shirts are usually',
+        label: 'Shirts usually run…',
         default: 'fine',
         compact: true,
         options: [

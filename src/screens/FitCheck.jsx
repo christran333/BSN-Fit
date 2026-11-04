@@ -7,7 +7,6 @@ import { Chips } from '../components/ui.jsx';
 export default function FitCheck({ data, token }) {
   const p = data.players.find((x) => x.token === token);
   const [answers, setAnswers] = useState(() => (p ? { ...defaultAnswers(p), ...(p.answers || {}) } : {}));
-  const [editing, setEditing] = useState(null);
 
   useEffect(() => { if (p) store.markOpened(p.id); }, [p?.id]);
 
@@ -30,7 +29,7 @@ export default function FitCheck({ data, token }) {
     parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}Five taps and you're done.</>, kicker: `${data.team.name} · for parents` },
     teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. Five taps, about 30 seconds.</>, kicker: data.team.name },
     standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About 30 seconds.', kicker: data.team.name },
-    returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Check it and submit.`, kicker: data.team.name },
+    returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Nothing changed? Just hit submit.`, kicker: data.team.name },
   }[flow];
 
   const header = (
@@ -69,14 +68,13 @@ export default function FitCheck({ data, token }) {
     </div>
   );
 
-  // returning athletes: one real question + prefilled rows they can open
+  // returning athletes: same five questions, all open, pre-selected from last order
   if (flow === 'returning') {
-    const [q1, ...rest] = questions;
     return (
       <div className="screen white">
-        <div className="screen-scroll" style={{ gap: 16 }}>
+        <div className="screen-scroll" style={{ gap: 12 }}>
           {header}
-          <div className="last-card">
+          <div className="last-card compact">
             <div className="disp last-size">{p.lastSize}</div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 16 }}>{sizeLabel(p.lastSize, p.cut)} · last order</div>
@@ -85,27 +83,12 @@ export default function FitCheck({ data, token }) {
               </div>
             </div>
           </div>
-          <div className="q">
-            <div className="ql"><span className="qn">01</span>{q1.label}</div>
-            <Chips q={q1} value={answers[q1.id]} onChange={set(q1.id)} />
-          </div>
-          <div>
-            {rest.map((q, i) =>
-              editing === q.id ? (
-                <div className="prefill-open" key={q.id}>
-                  <div className="ql"><span className="qn">0{i + 2}</span>{q.label}</div>
-                  <Chips q={q} value={answers[q.id]} onChange={(v) => { set(q.id)(v); setEditing(null); }} />
-                </div>
-              ) : (
-                <div className="prefill" key={q.id}>
-                  <span className="qn" style={{ width: 20 }}>0{i + 2}</span>
-                  <span className="pl">{q.label}</span>
-                  <span className="pv">{q.options.find((o) => o.value === answers[q.id])?.label}</span>
-                  <button className="ed" aria-label={`Change ${q.label}`} onClick={() => setEditing(q.id)}>Change</button>
-                </div>
-              ),
-            )}
-          </div>
+          {questions.map((q, i) => (
+            <div className="q" key={q.id}>
+              <div className="ql"><span className="qn">0{i + 1}</span>{q.label}</div>
+              <Chips q={q} value={answers[q.id]} onChange={set(q.id)} />
+            </div>
+          ))}
           {live && live.size !== p.lastSize && suggestion}
         </div>
         {foot}

@@ -14,10 +14,10 @@ function screenFor(path, data) {
   let m;
   if (path === '/coach' || path === '/') return <CoachDashboard data={data} />;
   if (path === '/coach/add') return <AddPlayer />;
-  if ((m = path.match(/^\/coach\/p\/([^/]+)/))) return <PlayerPage data={data} id={m[1]} />;
-  if ((m = path.match(/^\/sms\/([^/]+)/))) return <Sms data={data} token={m[1]} />;
-  if ((m = path.match(/^\/r\/([^/]+)\/done/))) return <Result data={data} token={m[1]} />;
-  if ((m = path.match(/^\/r\/([^/]+)/))) return <FitCheck data={data} token={m[1]} />;
+  if ((m = path.match(/^\/coach\/p\/([^/]+)/))) return <PlayerPage key={m[1]} data={data} id={m[1]} />;
+  if ((m = path.match(/^\/sms\/([^/]+)/))) return <Sms key={m[1]} data={data} token={m[1]} />;
+  if ((m = path.match(/^\/r\/([^/]+)\/done/))) return <Result key={m[1]} data={data} token={m[1]} />;
+  if ((m = path.match(/^\/r\/([^/]+)/))) return <FitCheck key={m[1]} data={data} token={m[1]} />;
   return <CoachDashboard data={data} />;
 }
 
