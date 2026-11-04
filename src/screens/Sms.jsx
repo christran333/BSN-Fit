@@ -17,17 +17,17 @@ export default function Sms({ data, token }) {
     <div className="screen sms">
       <header className="sms-head">
         <a href="#/coach" className="sms-back" aria-label="Back to roster">
-          <svg width="12" height="20" viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2L2 10l8 8" stroke="currentColor" strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          <svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" stroke="currentColor" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
           <span className="sms-count">3</span>
         </a>
         <div className="sms-contact">
-          <div className="sms-avatar" aria-hidden="true">BSN</div>
+          <div className="sms-avatar"><img src={`${import.meta.env.BASE_URL}bsn-mark.png`} alt="" /></div>
           <div className="sms-name">BSN Sports
-            <svg width="6" height="10" viewBox="0 0 6 10" aria-hidden="true"><path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" /></svg>
+            <svg width="5" height="9" viewBox="0 0 5 9" aria-hidden="true"><path d="M1 1l3 3.5L1 8" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
         </div>
         <span className="sms-video" aria-hidden="true">
-          <svg width="26" height="18" viewBox="0 0 26 18"><rect x="1" y="2" width="16" height="14" rx="3.5" stroke="currentColor" strokeWidth="1.8" fill="none" /><path d="M18 7l6-3.5v11L18 11" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinejoin="round" /></svg>
+          <svg width="27" height="18" viewBox="0 0 27 18"><rect x="1" y="2" width="17" height="14" rx="3.5" stroke="currentColor" strokeWidth="1.7" fill="none" /><path d="M19 7.2l6-3.6v10.8l-6-3.6" stroke="currentColor" strokeWidth="1.7" fill="none" strokeLinejoin="round" /></svg>
         </span>
       </header>
 

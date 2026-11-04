@@ -239,21 +239,28 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 
 /* ── iMessage screen ─────────────────────────────────────── */
 .phone-screen.is-sms { background: #fff; }
-.screen.sms { background: #fff; font-family: -apple-system, 'SF Pro Text', Inter, system-ui, sans-serif; }
+/* status bar + header read as one frosted bar, like iOS */
+.phone-screen.is-sms .phone-status { background: #f6f6f6; }
+.screen.sms { background: #fff; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, system-ui, sans-serif; }
 .sms-head {
-  flex: none; display: grid; grid-template-columns: 64px 1fr 64px; align-items: start; padding: 2px 12px 8px;
-  background: rgba(246, 246, 246, 0.94); border-bottom: 0.5px solid #d1d1d6;
+  flex: none; display: grid; grid-template-columns: 70px 1fr 70px; align-items: center;
+  padding: 0 16px 9px; background: #f6f6f6; border-bottom: 0.5px solid rgba(60, 60, 67, 0.22);
 }
-.sms-back { display: flex; align-items: center; gap: 2px; color: #007aff; text-decoration: none; padding-top: 14px; }
-.sms-count { background: #007aff; color: #fff; font-size: 13px; font-weight: 600; min-width: 22px; height: 22px; border-radius: 11px; display: flex; align-items: center; justify-content: center; padding: 0 6px; margin-left: 2px; }
-.sms-contact { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sms-back { display: flex; align-items: center; gap: 5px; color: #007aff; text-decoration: none; margin-top: -16px; }
+.sms-count {
+  background: #007aff; color: #fff; font-size: 12px; font-weight: 600; min-width: 20px; height: 20px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; padding: 0 6px; font-variant-numeric: tabular-nums;
+}
+.sms-contact { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .sms-avatar {
-  width: 52px; height: 52px; border-radius: 50%; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Barlow Condensed', Inter, sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.5px;
+  width: 48px; height: 48px; border-radius: 50%; background: #fff; overflow: hidden;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  display: flex; align-items: center; justify-content: center;
 }
-.sms-name { font-size: 12px; color: #111; display: flex; align-items: center; gap: 4px; }
-.sms-name svg { color: #8e8e93; }
-.sms-video { justify-self: end; color: #007aff; padding-top: 16px; }
+.sms-avatar img { width: 100%; height: 100%; display: block; }
+.sms-name { font-size: 11.5px; font-weight: 400; color: #000; display: flex; align-items: center; gap: 3px; letter-spacing: -0.1px; }
+.sms-name svg { color: #8e8e93; margin-top: 1px; }
+.sms-video { justify-self: end; color: #007aff; display: flex; margin-top: -16px; }
 .sms-thread { padding: 12px 14px 16px; gap: 6px; }
 .sms-meta { text-align: center; font-size: 11.5px; color: #8e8e93; line-height: 1.35; margin: 4px 0 10px; }
 .sms-meta b { font-weight: 600; }
