@@ -28,7 +28,7 @@ export default function App() {
     { label: 'Coach dashboard', href: '#/coach' },
     { label: 'Text from BSN · what athletes get', href: '#/sms/jordan-x2p' },
     { label: 'Mia · parent of a 10-year-old', href: '#/r/mia-7kq' },
-    { label: 'Jordan · says S, no size on file', href: '#/r/jordan-x2p' },
+    { label: 'Jordan · says S, no size on file', href: '#/r/jordan-x2p', star: true },
     { label: 'Dana · same as last year', href: '#/r/dana-a91' },
   ];
   return (
@@ -44,6 +44,11 @@ export default function App() {
           {demo.map((d) => (
             <a key={d.href} href={d.href} className={`#${path}`.replace(/\/done.*/, '') === d.href ? 'on' : ''}>
               {d.label}
+              {d.star && (
+                <svg className="demo-star" width="13" height="13" viewBox="0 0 24 24" role="img" aria-label="Same player as the text message demo">
+                  <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="currentColor" />
+                </svg>
+              )}
             </a>
           ))}
         </nav>
