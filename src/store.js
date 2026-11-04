@@ -4,10 +4,11 @@
 import { useSyncExternalStore } from 'react';
 import { recommend, flowFor } from './sizing.js';
 
-const KEY = 'bsn-fitcheck-v1';
+const KEY = 'bsn-fitcheck-v2';
 const listeners = new Set();
 
 const daysFromNow = (n) => new Date(Date.now() + n * 864e5).toISOString();
+const hoursAgo = (n) => new Date(Date.now() - n * 36e5).toISOString();
 const monthsAgo = (n) => {
   const d = new Date();
   d.setMonth(d.getMonth() - n);
@@ -31,19 +32,25 @@ function seed() {
     p5: { growth: 'little', lastFit: 'right', shoulders: 'right', reach: 'stays', height: '64-68' },
     p6: { changed: 'none', lastFit: 'right', pref: 'regular', height: '68-72', length: 'fine' },
   };
+  players.forEach((p, i) => {
+    p.sentAt = p.sentAt || hoursAgo(26 - i);
+    p.messages = [{ kind: 'invite', at: p.sentAt }];
+  });
   for (const p of players) {
     if (done[p.id]) {
       p.answers = done[p.id];
       p.rec = recommend(p, p.answers);
       p.finalSize = p.rec.size;
       p.status = 'ready';
-      p.submittedAt = daysFromNow(-1);
+      p.submittedAt = hoursAgo(20);
+      p.messages.push({ kind: 'confirm', at: p.submittedAt, size: p.finalSize });
     }
   }
   players.find((p) => p.id === 'p4').answersCount = 3;
   return {
     team: { name: 'Eagles Volleyball Club', order: 'Fall uniforms', coach: 'Coach Rivera', dueDate: daysFromNow(10) },
     players,
+    notice: null,
   };
 }
 
@@ -51,7 +58,7 @@ let state = load();
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) return { ...JSON.parse(raw), notice: null };
   } catch (e) { /* ignore */ }
   return seed();
 }
@@ -82,6 +89,7 @@ export const store = {
       sentAt: new Date().toISOString(),
       ...input,
     };
+    p.messages = [{ kind: 'invite', at: p.sentAt }];
     update((s) => { s.players.unshift(p); return s; });
     return p;
   },
@@ -89,16 +97,34 @@ export const store = {
     const p = state.players.find((x) => x.id === id);
     if (p && p.status === 'waiting') patchPlayer(id, { status: 'opened' });
   },
-  nudge: (id) => patchPlayer(id, { nudgedAt: new Date().toISOString() }),
+  /** send reminder texts and pop a notification preview of the first one */
+  nudge(ids) {
+    const list = Array.isArray(ids) ? ids : [ids];
+    if (!list.length) return;
+    const at = new Date().toISOString();
+    update((s) => {
+      s.players = s.players.map((p) =>
+        list.includes(p.id)
+          ? { ...p, nudgedAt: at, messages: [...(p.messages || [{ kind: 'invite', at: p.sentAt || at }]), { kind: 'nudge', at }] }
+          : p,
+      );
+      s.notice = { playerId: list[0], more: list.length - 1, at, key: Date.now() };
+      return s;
+    });
+  },
+  clearNotice: () => update((s) => { s.notice = null; return s; }),
   submit(id, answers) {
     const p = state.players.find((x) => x.id === id);
     const rec = recommend(p, answers);
+    const at = new Date().toISOString();
+    const already = (p.messages || []).some((m) => m.kind === 'confirm' && m.size === rec.size);
     patchPlayer(id, {
+      messages: already ? p.messages : [...(p.messages || []), { kind: 'confirm', at, size: rec.size }],
       answers,
       rec,
       finalSize: rec.size,
       status: rec.needsReview ? 'review' : 'ready',
-      submittedAt: new Date().toISOString(),
+      submittedAt: at,
     });
     return rec;
   },

@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { messagesFor, messageParts, threadTime } from '../messages.js';
 import { flowFor } from '../sizing.js';
 
 // iMessage-style screen: the text an athlete (or parent) gets from BSN.
 // Tapping the link or the preview card opens their fit check.
 export default function Sms({ data, token }) {
   const p = data.players.find((x) => x.token === token);
+  const threadRef = useRef(null);
+  const count = p ? messagesFor(p).length : 0;
+  useEffect(() => {
+    const el = threadRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, [count, token]);
   if (!p) return <div className="center-msg"><b>No text for this player.</b><a href="#/coach">Back to roster</a></div>;
 
   const first = p.name.split(' ')[0];
+  const msgs = messagesFor(p);
   const isParent = flowFor(p) === 'parent';
   const href = `#/r/${p.token}`;
-  const shown = `fitcheck.team/r/${p.token}`; // matches the mock browser bar
   const coach = data.team.coach;
 
   return (
@@ -31,29 +38,38 @@ export default function Sms({ data, token }) {
         </span>
       </header>
 
-      <div className="screen-scroll sms-thread">
-        <div className="sms-meta"><b>Text Message · SMS</b><br />Today 9:41 AM</div>
-
-        <div className="bubble">
-          {isParent ? `${coach} is asking for ${first}'s uniform size:` : 'Your coach is asking for your size:'}{' '}
-          <a href={href}>{shown}</a>
-          <br /><br />
-          {data.team.name} · {data.team.order}. Five taps, about 30 seconds.
-        </div>
-
-        <a href={href} className="sms-card">
-          <div className="sms-card-art" aria-hidden="true">
-            <span className="sms-card-bar" />
-            <span className="disp">Fit Check</span>
-            <span className="sms-card-sub">{isParent ? `${first}'s uniform size` : `${first}'s jersey size`}</span>
-          </div>
-          <div className="sms-card-meta">
-            <div className="sms-card-title">{data.team.name}: {data.team.order}</div>
-            <div className="sms-card-domain">fitcheck.team</div>
-          </div>
-        </a>
-
-        <div className="bubble small">Reply STOP to opt out.</div>
+      <div className="screen-scroll sms-thread" ref={threadRef}>
+        {msgs.map((m, i) => {
+          const prev = msgs[i - 1];
+          const showTime = !prev || new Date(m.at) - new Date(prev.at) > 15 * 60 * 1000;
+          const { lead, link, after } = messageParts(p, data.team, m);
+          const isNew = i === msgs.length - 1 && Date.now() - new Date(m.at) < 8000;
+          return (
+            <React.Fragment key={`${m.kind}-${m.at}-${i}`}>
+              {showTime && (
+                <div className="sms-meta">{i === 0 && <><b>Text Message · SMS</b><br /></>}{threadTime(m.at)}</div>
+              )}
+              <div className={`bubble${isNew ? ' is-new' : ''}`}>
+                {lead}{link && <> <a href={href}>{link}</a></>}
+                {after && <><br /><br />{after}</>}
+              </div>
+              {m.kind === 'invite' && (
+                <a href={href} className="sms-card">
+                  <div className="sms-card-art" aria-hidden="true">
+                    <span className="sms-card-bar" />
+                    <span className="disp">Fit Check</span>
+                    <span className="sms-card-sub">{isParent ? `${first}'s uniform size` : `${first}'s jersey size`}</span>
+                  </div>
+                  <div className="sms-card-meta">
+                    <div className="sms-card-title">{data.team.name}: {data.team.order}</div>
+                    <div className="sms-card-domain">fitcheck.team</div>
+                  </div>
+                </a>
+              )}
+              {i === 0 && <div className="bubble small">Reply STOP to opt out.</div>}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       <div className="sms-bar" aria-hidden="true">

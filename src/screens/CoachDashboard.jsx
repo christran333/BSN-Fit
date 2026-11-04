@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { store } from '../store.js';
 import { shortSize, sizeLabel } from '../sizing.js';
-import { initials, timeAgo, useToast } from '../components/ui.jsx';
+import { initials, timeAgo } from '../components/ui.jsx';
 
 const subFor = (p) => {
   if (p.status === 'review') return p.flagReason || p.rec?.flagReason || 'Needs a look';
@@ -19,7 +19,6 @@ const subFor = (p) => {
 export default function CoachDashboard({ data }) {
   const { team, players } = data;
   const [filter, setFilter] = useState('all');
-  const [toast, showToast] = useToast();
 
   const ready = players.filter((p) => p.status === 'ready');
   const review = players.filter((p) => p.status === 'review');
@@ -38,10 +37,7 @@ export default function CoachDashboard({ data }) {
     .slice()
     .sort((a, b) => order[a.status] - order[b.status]);
 
-  const nudgeAll = () => {
-    waiting.forEach((p) => store.nudge(p.id));
-    showToast(waiting.length ? `Reminder sent to ${waiting.length}` : 'Everyone is in');
-  };
+  const nudgeAll = () => store.nudge(waiting.map((p) => p.id));
 
   return (
     <div className="screen">
@@ -101,7 +97,7 @@ export default function CoachDashboard({ data }) {
               {(p.status === 'waiting' || p.status === 'opened') && (
                 <button
                   className="btn-sm"
-                  onClick={(e) => { e.preventDefault(); store.nudge(p.id); showToast(`Reminder sent to ${p.name.split(' ')[0]}`); }}
+                  onClick={(e) => { e.preventDefault(); store.nudge(p.id); }}
                 >
                   Nudge
                 </button>
@@ -117,7 +113,6 @@ export default function CoachDashboard({ data }) {
           Add player
         </a>
       </div>
-      {toast}
     </div>
   );
 }

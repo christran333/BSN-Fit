@@ -8,6 +8,7 @@ import PlayerPage from './screens/PlayerPage.jsx';
 import FitCheck from './screens/FitCheck.jsx';
 import Result from './screens/Result.jsx';
 import Sms from './screens/Sms.jsx';
+import Notice from './components/Notice.jsx';
 
 function screenFor(path, data) {
   let m;
@@ -50,7 +51,7 @@ export default function App() {
           Reset demo data
         </button>
       </aside>
-      <PhoneFrame path={path}>{screenFor(path, data)}</PhoneFrame>
+      <PhoneFrame path={path} overlay={<Notice data={data} />}>{screenFor(path, data)}</PhoneFrame>
     </div>
   );
 }

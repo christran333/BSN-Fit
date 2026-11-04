@@ -49,7 +49,7 @@ export default function PlayerPage({ data, id }) {
             </div>
             {p.contact && <div className="help">Sent to {p.contact}{p.nudgedAt ? ` · nudged ${timeAgo(p.nudgedAt)}` : ''}</div>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-              <button className="btn btn-ghost" onClick={() => { store.nudge(p.id); showToast(`Reminder sent to ${first}`); }}>Nudge {first}</button>
+              <button className="btn btn-ghost" onClick={() => store.nudge(p.id)}>Nudge {first}</button>
               <a className="btn btn-ghost" href={`#/sms/${p.token}`}>See the text</a>
             </div>
           </div>

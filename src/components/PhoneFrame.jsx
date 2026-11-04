@@ -21,7 +21,7 @@ function useFitScale() {
   return scale;
 }
 
-export default function PhoneFrame({ path, children }) {
+export default function PhoneFrame({ path, children, overlay }) {
   const scale = useFitScale();
   return (
     <div className="phone-fit" style={{ '--s': scale, width: PHONE_W * scale, height: PHONE_H * scale }}>
@@ -49,6 +49,7 @@ export default function PhoneFrame({ path, children }) {
             fitcheck.team{path}
           </div>}
           <div className="app">{children}</div>
+          {overlay}
           <div className="phone-home" aria-hidden="true" />
         </div>
       </div>
