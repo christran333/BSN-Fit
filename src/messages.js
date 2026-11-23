@@ -11,11 +11,11 @@
 //   confirm  size received
 //   reply    (athlete → BSN) a tapped quick reply, stored with its text
 //   ack      BSN's short answer to a quick reply, stored with its text
-import { flowFor, sizeLabel } from './sizing.js';
+import { flowFor, sizeLabel, questionsFor, hasHeightOnFile } from './sizing.js';
 
 export const shortLink = (p) => `fitcheck.team/r/${p.token}`;
 export const MINUTE = 'about a minute';
-const QUESTIONS = 5;
+export const qCount = (p) => questionsFor(p).length;
 
 export function messagesFor(p) {
   // older saved data had no message log: start with the invite
@@ -92,7 +92,7 @@ export function cardFor(p, team) {
       teen: `${first}'s ${team.season} fit check`,
       standard: `${first}'s ${team.season} fit check`,
     }[flow],
-    foot: flow === 'returning' ? `Last order: ${sizeLabel(p.lastSize, p.cut)}` : `5 questions · due ${fmtDue(team)}`,
+    foot: flow === 'returning' ? `Last order: ${sizeLabel(p.lastSize, p.cut)}` : `${qCount(p)} questions · due ${fmtDue(team)}`,
   };
 }
 
@@ -116,10 +116,16 @@ export function messageParts(p, team, msg) {
       const proof = st && st.done > 0 ? `, and ${st.done} of ${st.total} teammates already have` : '';
       const flow = flowFor(p);
       const last = p.lastSize ? sizeLabel(p.lastSize, p.cut) : null;
+      const QUESTIONS = qCount(p);
+      // height on file: we already know how much they've grown, so say so
+      const kid = hasHeightOnFile(p)
+        ? `${first} wore ${last} last time, and we have ${first}'s height from then, so we can work out the growth. We`
+        : last ? `${first} wore ${last} last time, and kids grow fast, so we` : 'We';
+      const teenWhy = hasHeightOnFile(p) ? "We have your height from then, so we'll work out the growth. We" : 'A year can change a lot. We';
       const lead = {
-        parent: `Hi! ${first}'s ${team.short} uniform order is coming together. ${last ? `${first} wore ${last} last time, and kids grow fast, so we` : 'We'}'ll ask ${QUESTIONS} quick questions to get the size right. Most parents finish in about a minute${proof}. Ready?`,
+        parent: `Hi! ${first}'s ${team.short} uniform order is coming together. ${kid}'ll ask ${QUESTIONS} quick questions to get the size right. Most parents finish in about a minute${proof}. Ready?`,
         returning: `${hi} last season you wore ${last} and kept it. If nothing's changed, tap below and you're done. Want to double-check? It's ${QUESTIONS} quick taps.`,
-        teen: `${hi} you wore ${last} last season, and a year can change a lot. We'll ask ${QUESTIONS} quick questions to get your size right. Most players finish in about a minute${proof}. Ready?`,
+        teen: `${hi} you wore ${last} last season. ${teenWhy}'ll ask ${QUESTIONS} quick questions to get your size right. Most players finish in about a minute${proof}. Ready?`,
         standard: `${hi} your ${team.short} jersey order is coming together. To get your size right, we'll ask ${QUESTIONS} quick questions. Most players finish in about a minute${proof}. Ready?`,
       }[flow];
       return { lead, link: null, after: null };
@@ -143,8 +149,8 @@ export function messageParts(p, team, msg) {
 
     case 'partial': {
       const answered = msg.answered ?? p.answersCount ?? 3;
-      const left = QUESTIONS - answered;
-      const pct = Math.round((answered / QUESTIONS) * 100);
+      const left = qCount(p) - answered;
+      const pct = Math.round((answered / qCount(p)) * 100);
       if (left <= 0) {
         return {
           lead: `${hey(`${your} answers are saved, you just didn't hit submit.`)} Want to finish now? It's one tap.`,

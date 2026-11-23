@@ -368,3 +368,28 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .demo-foot a { font-size: 13.5px; font-weight: 700; color: var(--ink); }
 .demo-foot a.on { color: var(--red); }
 .demo-foot .demo-reset { align-self: center; }
+
+/* ── height-on-file toggle (demo panel) ──────────────────── */
+.demo-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; background: #fff; border-radius: 11px; margin-top: -6px; }
+.demo-seg button { border: 0; background: none; font: inherit; font-size: 13.5px; font-weight: 600; padding: 7px 6px; border-radius: 8px; color: var(--ink); cursor: pointer; }
+.demo-seg button[aria-selected='true'] { background: var(--ink); color: #fff; }
+
+/* ── coach setup ─────────────────────────────────────────── */
+.setup-steps { display: flex; align-items: center; gap: 5px; }
+.setup-steps span { width: 28px; height: 4px; border-radius: 2px; background: var(--line); }
+.setup-steps span.on { background: var(--red); }
+.setup-steps b { font-size: 12px; color: var(--muted); margin-left: 6px; }
+.setup-preview { background: #fff; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.setup-preview .bubble { font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif; font-size: 15px; }
+.import-card {
+  display: flex; align-items: center; gap: 12px; text-align: left; border: 0; font: inherit; color: var(--ink); cursor: pointer;
+  background: #fff; border-radius: 16px; padding: 14px 14px 14px 16px; box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.import-card div { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.import-card b { font-size: 15.5px; }
+.import-card div span { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.import-go { flex: none; background: var(--red); color: #fff; font-weight: 700; font-size: 14px; padding: 8px 14px; border-radius: 10px; }
+.flow-tag { flex: none; font-size: 11.5px; font-weight: 700; background: var(--bg); color: var(--ink-2); padding: 5px 8px; border-radius: 8px; white-space: nowrap; }
+.x-btn { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
+.x-btn:hover { background: var(--bg); }
+.pinfo .flow-tag { align-self: flex-start; margin-top: 5px; font-size: 11px; padding: 3px 7px; }

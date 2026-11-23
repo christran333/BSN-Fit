@@ -28,6 +28,10 @@ The demo panel works like this: **pick who gets the text** (Jordan, Mia's parent
 5. **After deadline**: order closed; offer the next batch (the link shows a "join the next batch" page too)
 6. **Done**: confirmation text; the coach has the size
 
+**On file from last season** (Mia and Maya): *Size only* asks how much they've grown (5 questions). *Size + height* asks today's height and works out the growth from last season's height (4 questions).
+
+**Coach setup** is the first-time flow: order details (school, team, season, due date, the coach name that goes on the texts), then the roster (import last season's order from BSN, or add players with age, number, last size and last height), then send.
+
 **Their journey** jumps between that person's screens: Text › Fit check › Result › Coach view. Reply buttons in the thread work (RCS-style suggested replies). Dana can reply **Same as last year** and submit without opening the link. All text copy is in `src/messages.js`.
 
 Everything is saved in the browser (localStorage), so a submit on an athlete link shows up on the coach dashboard right away. Use **Reset demo data** to start over.

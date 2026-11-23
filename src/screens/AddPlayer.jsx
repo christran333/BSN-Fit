@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { store } from '../store.js';
-import { flowFor, FLOW_META, describeFlow, YOUTH_LADDER, ADULT_LADDER, sizeLabel } from '../sizing.js';
+import { flowFor, FLOW_META, describeFlow, YOUTH_LADDER, ADULT_LADDER, sizeLabel, questionsFor, formatHeight } from '../sizing.js';
 import { go } from '../router.js';
 import { Back, Check } from '../components/ui.jsx';
 
@@ -10,8 +10,11 @@ const CUTS = [
   { value: 'unisex', label: 'Unisex' },
 ];
 
-export default function AddPlayer() {
-  const [f, setF] = useState({ name: '', number: '', age: '', cut: 'womens', lastSize: '', lastOrderDate: '', contact: '' });
+const HEIGHTS = Array.from({ length: 49 }, (_, i) => 36 + i); // 3 ft to 7 ft
+
+export default function AddPlayer({ setup = false }) {
+  const [f, setF] = useState({ name: '', number: '', age: '', cut: 'womens', lastSize: '', lastOrderDate: '', lastHeight: '', contact: '' });
+  const back = setup ? '#/coach/setup/roster' : '#/coach';
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target ? e.target.value : e }));
 
   const age = Number(f.age);
@@ -24,6 +27,7 @@ export default function AddPlayer() {
       cut: isKid ? (f.cut === 'mens' ? 'boys' : 'girls') : f.cut,
       lastSize: f.lastSize || null,
       lastOrderDate: f.lastSize ? (f.lastOrderDate ? new Date(f.lastOrderDate).toISOString() : new Date(Date.now() - 365 * 864e5).toISOString()) : null,
+      lastHeight: f.lastSize && f.lastHeight ? Number(f.lastHeight) : null,
     }),
     [f, age, isKid],
   );
@@ -37,16 +41,17 @@ export default function AddPlayer() {
       name: f.name.trim(),
       number: f.number ? Number(f.number) : null,
       contact: f.contact || null,
-    });
-    go(`/coach/p/${p.id}`);
+    }, { draft: setup });
+    go(setup ? '/coach/setup/roster' : `/coach/p/${p.id}`);
   };
 
   return (
     <div className="screen">
       <div className="screen-scroll" style={{ gap: 14 }}>
         <div>
-          <Back href="#/coach">Roster</Back>
+          <Back href={back}>Roster</Back>
           <h1 className="disp h1">Add player</h1>
+          {setup && <p className="lede" style={{ marginTop: 6 }}>Nothing sends yet. You'll review everyone first.</p>}
         </div>
 
         <div className="field"><label htmlFor="nm">Player name</label><input id="nm" className="input" value={f.name} onChange={set('name')} placeholder="First and last" autoComplete="off" /></div>
@@ -77,6 +82,14 @@ export default function AddPlayer() {
           </div>
         </div>
 
+        <div className="field"><label htmlFor="lh">Height at that order (optional)</label>
+          <select id="lh" className="input" value={f.lastHeight} onChange={set('lastHeight')} disabled={!f.lastSize} style={{ opacity: f.lastSize ? 1 : 0.5 }}>
+            <option value="">Not on file</option>
+            {HEIGHTS.map((h) => <option key={h} value={h}>{formatHeight(h)}</option>)}
+          </select>
+          <span className="help">{f.lastSize ? 'With last size and height, we measure growth instead of asking about it.' : 'Add a last size first.'}</span>
+        </div>
+
         <div className="field"><label htmlFor="pc">{isKid ? "Parent's phone" : 'Phone or email'}</label><input id="pc" className="input" inputMode="tel" value={f.contact} onChange={set('contact')} placeholder={isKid ? 'Link goes to the parent' : 'Where to text the link'} /></div>
 
         <div className="flow-card" aria-live="polite">
@@ -85,7 +98,7 @@ export default function AddPlayer() {
               <div className="flow-kicker">Their link will be</div>
               <div style={{ fontWeight: 700, fontSize: 17, marginTop: 2 }}>{meta.title}</div>
             </div>
-            <div style={{ textAlign: 'right', fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>5 taps<br />{meta.time}</div>
+            <div style={{ textAlign: 'right', fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{questionsFor(draft).length} taps<br />{meta.time}</div>
           </div>
           {describeFlow(draft).map((t) => (
             <div className="li" key={t}><span className="dot"><Check /></span>{t}</div>
@@ -94,7 +107,7 @@ export default function AddPlayer() {
       </div>
 
       <div className="screen-foot">
-        <button className="btn btn-red" disabled={!ready} onClick={create}>Create link</button>
+        <button className="btn btn-red" disabled={!ready} onClick={create}>{setup ? 'Add to roster' : 'Create link'}</button>
       </div>
     </div>
   );

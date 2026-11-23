@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRoute } from './router.js';
-import { useStore, store, SCENARIOS, PEOPLE, DEMO_TOKEN } from './store.js';
+import { useStore, store, SCENARIOS, PEOPLE, DEMO_TOKEN, canHaveHeight } from './store.js';
 import PhoneFrame from './components/PhoneFrame.jsx';
 import CoachDashboard from './screens/CoachDashboard.jsx';
 import AddPlayer from './screens/AddPlayer.jsx';
@@ -8,12 +8,15 @@ import PlayerPage from './screens/PlayerPage.jsx';
 import FitCheck from './screens/FitCheck.jsx';
 import Result from './screens/Result.jsx';
 import Sms from './screens/Sms.jsx';
+import CoachSetup from './screens/CoachSetup.jsx';
 import Notice from './components/Notice.jsx';
 
 function screenFor(path, data) {
   let m;
   if (path === '/coach' || path === '/') return <CoachDashboard data={data} />;
-  if (path === '/coach/add') return <AddPlayer />;
+  if (path === '/coach/setup') return <CoachSetup data={data} step="order" />;
+  if (path === '/coach/setup/roster') return <CoachSetup data={data} step="roster" />;
+  if (path.startsWith('/coach/add')) return <AddPlayer setup={path.includes('setup=1')} />;
   if ((m = path.match(/^\/coach\/p\/([^/]+)/))) return <PlayerPage key={m[1]} data={data} id={m[1]} />;
   if ((m = path.match(/^\/sms\/([^/]+)/))) return <Sms key={m[1]} data={data} token={m[1]} />;
   if ((m = path.match(/^\/r\/([^/]+)\/done/))) return <Result key={m[1]} data={data} token={m[1]} />;
@@ -29,7 +32,7 @@ export default function App() {
   const scenario = SCENARIOS.find((sc) => sc.id === demo.scenario);
   const submitted = person && (person.status === 'ready' || person.status === 'review');
 
-  const pick = (token, id) => { store.scenario(token, id); window.location.hash = `/sms/${token}`; };
+  const pick = (token, id, h) => { store.scenario(token, id, h); window.location.hash = `/sms/${token}`; };
   const journey = person ? [
     { label: 'Text', href: `#/sms/${person.token}` },
     { label: 'Fit check', href: `#/r/${person.token}` },
@@ -55,6 +58,21 @@ export default function App() {
           ))}
         </div>
 
+        {canHaveHeight(demo.token) && (
+          <>
+            <div className="demo-section">On file from last season</div>
+            <div className="demo-seg" role="tablist" aria-label="What's on file">
+              <button role="tab" aria-selected={!demo.heightOnFile} onClick={() => pick(demo.token, demo.scenario, false)}>Size only</button>
+              <button role="tab" aria-selected={!!demo.heightOnFile} onClick={() => pick(demo.token, demo.scenario, true)}>Size + height</button>
+            </div>
+            <p className="demo-note">
+              {demo.heightOnFile
+                ? 'We know last height, so they enter today’s height and we work out growth. 4 questions.'
+                : 'No height on file, so we ask how much they’ve grown. 5 questions.'}
+            </p>
+          </>
+        )}
+
         <div className="demo-section">Scenario</div>
         <div className="demo-tabs" role="tablist" aria-label="Scenario">
           {SCENARIOS.map((sc, i) => (
@@ -76,7 +94,8 @@ export default function App() {
         </nav>
 
         <div className="demo-foot">
-          <a href="#/coach" className={here === '#/coach' ? 'on' : ''}>Coach dashboard</a>
+          <a href="#/coach/setup" onClick={() => store.beginSetup()} className={here.startsWith('#/coach/setup') ? 'on' : ''}>Coach setup</a>
+          <a href="#/coach" className={here === '#/coach' ? 'on' : ''}>Dashboard</a>
           <button className="demo-reset" onClick={() => pick(demo.token, demo.scenario)}>Restart scenario</button>
         </div>
       </aside>

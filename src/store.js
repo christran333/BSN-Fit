@@ -5,7 +5,7 @@ import { useSyncExternalStore } from 'react';
 import { recommend, flowFor, questionsFor, defaultAnswers } from './sizing.js';
 import { nudgeKindFor, teamStats, daysLeft, ackFor, ALL_REPLIES } from './messages.js';
 
-const KEY = 'bsn-fitcheck-v4';
+const KEY = 'bsn-fitcheck-v5';
 export const DEMO_TOKEN = 'jordan-x2p';
 const listeners = new Set();
 
@@ -84,8 +84,12 @@ export const TEAM = {
 export const PEOPLE = [
   { token: 'jordan-x2p', label: 'Jordan', sub: '17 · no size on file' },
   { token: 'mia-7kq', label: "Mia's parent", sub: 'Mia is 10 · text goes to a parent' },
+  { token: 'maya-p8w', label: 'Maya', sub: '15 · wore S last season' },
   { token: 'dana-a91', label: 'Dana', sub: '24 · returning, same as last year' },
 ];
+// last season's height, used when the "size + height on file" tab is on
+const HEIGHT_ON_FILE = { 'mia-7kq': 52, 'maya-p8w': 63 };
+export const canHaveHeight = (token) => token in HEIGHT_ON_FILE;
 export const SCENARIOS = [
   { id: 'first', label: 'First text', note: 'No obstacles. The invite, then what to expect.' },
   { id: 'ignored', label: 'Ignored it', note: 'Three days later, no answer yet.' },
@@ -95,16 +99,17 @@ export const SCENARIOS = [
   { id: 'done', label: 'Done', note: 'Submitted. Confirmation text, and the coach has the size.' },
 ];
 
-function buildScenario(token = DEMO_TOKEN, id = 'first') {
+function buildScenario(token = DEMO_TOKEN, id = 'first', heightOnFile = false) {
   const s = seed();
-  s.demo = { token, scenario: id };
+  s.demo = { token, scenario: id, heightOnFile };
   const p = s.players.find((x) => x.token === token);
+  if (heightOnFile && canHaveHeight(token)) p.lastHeight = HEIGHT_ON_FILE[token];
+  for (const k of ['answers', 'rec', 'finalSize', 'submittedAt', 'draft', 'answersCount']) delete p[k];
   const msg = (kind, at, extra = {}) => ({ kind, at, ...extra });
   const start = (daysBack) => {
     const at = id === 'first' ? minsAgo(1) : hoursAgo(daysBack * 24);
     p.sentAt = at;
     p.status = 'waiting';
-    delete p.answersCount;
     p.messages = [msg('invite', at), msg('intro', plusSec(at, 2), { stats: teamStats(s.players, p) })];
     return at;
   };
@@ -182,18 +187,66 @@ const patchPlayer = (id, patch) =>
 export const store = {
   get: () => state,
   subscribe: (l) => { listeners.add(l); return () => listeners.delete(l); },
-  reset: () => { const d = state.demo || {}; state = buildScenario(d.token, 'first'); save(); },
-  scenario: (token, id) => { state = buildScenario(token, id); save(); },
+  reset: () => { const d = state.demo || {}; state = buildScenario(d.token, 'first', d.heightOnFile); save(); },
+  scenario: (token, id, heightOnFile = state.demo?.heightOnFile) => { state = buildScenario(token, id, !!heightOnFile); save(); },
 
-  addPlayer(input) {
+  // ── coach setup: order details, then roster, then send ──────
+  beginSetup() {
+    state = {
+      team: { ...TEAM, dueDate: daysFromNow(7) },
+      players: [],
+      notice: null,
+      demo: { ...(state.demo || {}), setup: true },
+    };
+    save();
+  },
+  saveTeam(patch) {
+    update((s) => {
+      const t = { ...s.team, ...patch };
+      t.short = t.school.split(' ')[0] || t.school;
+      t.name = `${t.school.replace(/High School/i, 'HS')} · ${t.program}`;
+      t.order = `${t.season} uniforms`;
+      s.team = t;
+      return s;
+    });
+  },
+  /** BSN already has last season's order for this team: pull it in */
+  importRoster() {
+    const keep = ['id', 'name', 'number', 'age', 'cut', 'lastSize', 'lastOrderDate', 'heightBand', 'contact', 'token'];
+    update((s) => {
+      const have = new Set(s.players.map((p) => p.token));
+      const last = seed().players
+        .filter((p) => !have.has(p.token))
+        .map((p) => ({ ...Object.fromEntries(keep.filter((k) => p[k] != null).map((k) => [k, p[k]])), lastHeight: HEIGHT_ON_FILE[p.token] ?? null, status: 'draft' }));
+      s.players = [...s.players, ...last];
+      return s;
+    });
+  },
+  removePlayer: (id) => update((s) => { s.players = s.players.filter((p) => p.id !== id); return s; }),
+  sendLinks() {
+    const at = new Date().toISOString();
+    update((s) => {
+      s.players = s.players.map((p) => {
+        if (p.status !== 'draft') return p;
+        const q = { ...p, status: 'waiting', sentAt: at };
+        q.messages = [{ kind: 'invite', at }, { kind: 'intro', at: plusSec(at, 2), stats: teamStats(s.players, q) }];
+        return q;
+      });
+      s.demo = { ...(s.demo || {}), setup: false };
+      return s;
+    });
+  },
+
+  addPlayer(input, { draft = false } = {}) {
     const p = {
       id: `p${Date.now()}`,
-      status: 'waiting',
+      status: draft ? 'draft' : 'waiting',
       token: makeToken(input.name),
       sentAt: new Date().toISOString(),
       ...input,
     };
     update((s) => {
+      if (draft) { delete p.sentAt; s.players.push(p); return s; }
       p.messages = [{ kind: 'invite', at: p.sentAt }, { kind: 'intro', at: plusSec(p.sentAt, 2), stats: teamStats([p, ...s.players], p) }];
       s.players.unshift(p);
       return s;

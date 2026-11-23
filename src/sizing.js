@@ -73,6 +73,10 @@ export function monthsSince(iso) {
   return (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
 }
 
+/** we know their size AND height from last season, so growth is measured, not asked */
+export const hasHeightOnFile = (p) => !!(p.lastSize && p.lastHeight);
+export const bandFor = (h) => (h < 64 ? 'u64' : h < 68 ? '64-68' : h < 72 ? '68-72' : '72+');
+
 export function formatHeight(inches) {
   return `${Math.floor(inches / 12)} ft ${inches % 12} in`;
 }
@@ -98,7 +102,9 @@ export function describeFlow(p) {
   const months = monthsSince(p.lastOrderDate);
   const out = [];
   if (flow === 'parent') out.push(`Age ${p.age}, so the link goes to a parent and talks to them`);
-  if (p.lastSize && (flow === 'parent' || flow === 'teen'))
+  if (hasHeightOnFile(p) && (flow === 'parent' || flow === 'teen'))
+    out.push(`Height on file (${formatHeight(p.lastHeight)}), so it asks today's height and works out growth instead of asking`);
+  else if (p.lastSize && (flow === 'parent' || flow === 'teen'))
     out.push(`Asks about growth since ${sizeLabel(p.lastSize, p.cut)}${months ? `, ${months} months ago` : ''}`);
   if (flow === 'returning') out.push(`Answers filled in from the ${sizeLabel(p.lastSize, p.cut)} order, so it's one tap`);
   if (flow === 'standard') out.push('No size on file, so it asks how tops fit instead of what size they are');
@@ -106,7 +112,7 @@ export function describeFlow(p) {
   return out;
 }
 
-// ── the 5 questions ──────────────────────────────────────────
+// ── the questions (5, or 4 when height is on file) ──────────────────────────────────────────
 const HEIGHT_BANDS = [
   { value: 'u64', label: `Under 5'4"` },
   { value: '64-68', label: `5'4"–5'8"` },
@@ -136,18 +142,21 @@ export function questionsFor(p) {
   const name = firstName(p);
   const last = p.lastSize ? sizeLabel(p.lastSize, p.cut) : null;
 
+  const onFile = hasHeightOnFile(p);
+  const wasLine = onFile ? `Last season: ${formatHeight(p.lastHeight)}. ` : '';
+
   if (flow === 'parent') {
     return [
       {
         id: 'height',
         type: 'stepper',
         label: `How tall is ${name} now?`,
-        help: 'Best guess is fine.',
-        default: TYPICAL_HEIGHT[p.age] ?? 52,
+        help: `${wasLine}Best guess is fine.`,
+        default: onFile ? p.lastHeight + 1 : TYPICAL_HEIGHT[p.age] ?? 52,
         min: 36,
         max: 72,
       },
-      {
+      !onFile && {
         id: 'growth',
         label: last ? `Since last season, ${name} has grown…` : `In the past year, ${name} has grown…`,
         options: [
@@ -185,7 +194,7 @@ export function questionsFor(p) {
           { value: 'room', label: 'Room to grow', wide: true },
         ],
       },
-    ];
+    ].filter(Boolean);
   }
 
   if (flow === 'returning') {
@@ -234,6 +243,31 @@ export function questionsFor(p) {
           { value: 'fine', label: 'Long enough' },
         ],
       },
+    ];
+  }
+
+  if (flow === 'teen' && onFile) {
+    return [
+      {
+        id: 'height',
+        type: 'stepper',
+        label: 'How tall are you now?',
+        help: `${wasLine}Best guess is fine.`,
+        default: p.lastHeight,
+        min: 54,
+        max: 84,
+      },
+      {
+        id: 'lastFit',
+        label: `That ${last} felt…`,
+        options: [
+          { value: 'tight', label: 'Tight' },
+          { value: 'right', label: 'Just right' },
+          { value: 'roomy', label: 'Roomy' },
+        ],
+      },
+      SHOULDERS,
+      REACH,
     ];
   }
 
@@ -308,8 +342,12 @@ export function recommend(p, a = {}, extras = {}) {
 
   let delta = SIZE_UP_BIAS;
 
-  // growth (kids + teens)
-  if (a.growth === 'lot') { delta += 1; reasons.push('Grown a lot since last season'); }
+  // growth (kids + teens): measured from height on file when we have it
+  const grew = p.lastHeight && typeof a.height === 'number' ? a.height - p.lastHeight : null;
+  if (grew !== null) {
+    if (grew >= 3) { delta += 1; reasons.push(`Grew ${grew} in since last season`); }
+    else if (grew >= 1.5) { delta += 0.5; reasons.push(`Grew ${grew} in since last season`); }
+  } else if (a.growth === 'lot') { delta += 1; reasons.push('Grown a lot since last season'); }
   else if (a.growth === 'little') { delta += 0.5; reasons.push('Grown a little since last season'); }
   else if (!a.growth && p.age < 16 && (monthsSince(p.lastOrderDate) ?? 0) >= 9) {
     delta += 0.4;
@@ -338,8 +376,8 @@ export function recommend(p, a = {}, extras = {}) {
   if (a.length === 'short') { delta += 0.5; reasons.push('Shirts usually run short on you'); }
 
   // height as a sanity check (adults/teens)
-  if (a.height && typeof a.height === 'string' && !isYouth(p)) {
-    const expect = HEIGHT_EXPECT[cutKey(p)][a.height];
+  if (a.height && !isYouth(p)) {
+    const expect = HEIGHT_EXPECT[cutKey(p)][typeof a.height === 'number' ? bandFor(a.height) : a.height];
     if (expect !== undefined && expect > base + delta + 0.5) {
       delta += 0.5;
       reasons.push('Height usually lands a size up');
@@ -378,7 +416,8 @@ export function recommend(p, a = {}, extras = {}) {
   let needsReview = false;
   let flagReason = null;
   // (a teen who grew is expected to size up, so that's not a flag)
-  const disagrees = flow === 'standard' || (flow === 'teen' && a.growth === 'none');
+  const noGrowth = grew !== null ? grew < 1.5 : a.growth === 'none';
+  const disagrees = flow === 'standard' || (flow === 'teen' && noGrowth);
   if (disagrees && statedIdx >= 0 && index - statedIdx >= 1) {
     needsReview = true;
     flagReason = `Picked ${statedSize} · answers point to ${size}`;

@@ -59,8 +59,8 @@ export default function FitCheck({ data, token }) {
   };
 
   const head = {
-    parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}Five taps and you're done.</>, kicker: `${data.team.name} · for parents` },
-    teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. Five quick questions, about a minute.</>, kicker: data.team.name },
+    parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}{questions.length === 4 ? 'Four' : 'Five'} taps and you're done.</>, kicker: `${data.team.name} · for parents` },
+    teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. {questions.length === 4 ? 'Four' : 'Five'} quick questions, about a minute.</>, kicker: data.team.name },
     standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About a minute.', kicker: data.team.name },
     returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Nothing changed? Just hit submit.`, kicker: data.team.name },
   }[flow];
@@ -91,7 +91,7 @@ export default function FitCheck({ data, token }) {
       <button className="btn btn-red" style={flow === 'returning' ? { height: 56, fontSize: 17 } : null} disabled={!complete} onClick={() => submit(false)}>
         {flow === 'returning' && answers.changed === 'none' && live?.size === p.lastSize
           ? `Yep, same: submit ${live.size}`
-          : complete ? 'Submit' : `Submit · ${answered} of 5`}
+          : complete ? 'Submit' : `Submit · ${answered} of ${questions.length}`}
       </button>
       <div className="foot-links">
         <button className="lnk" disabled={!complete} style={{ opacity: complete ? 1 : 0.45 }} onClick={() => submit(true)}>Not sure about this size?</button>

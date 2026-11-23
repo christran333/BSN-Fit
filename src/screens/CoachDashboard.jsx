@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { store } from '../store.js';
-import { shortSize, sizeLabel } from '../sizing.js';
+import { shortSize, sizeLabel, questionsFor } from '../sizing.js';
 import { initials, timeAgo } from '../components/ui.jsx';
 
 const subFor = (p) => {
@@ -11,10 +11,11 @@ const subFor = (p) => {
     if (p.lastSize && p.finalSize === p.lastSize) return 'Same as last order';
     return 'Fit check done';
   }
+  if (p.status === 'draft') return 'Link not sent yet';
   if (p.nextBatch) return 'Asked for the next batch';
   if (p.declined) return 'Said not now';
   if (p.nudgedAt) return `Nudged ${timeAgo(p.nudgedAt)}`;
-  if (p.status === 'opened') return p.answersCount ? `Opened · ${p.answersCount} of 5 answered` : 'Opened · not submitted';
+  if (p.status === 'opened') return p.answersCount ? `Opened · ${p.answersCount} of ${questionsFor(p).length} answered` : 'Opened · not submitted';
   return p.sentAt ? `Link sent ${timeAgo(p.sentAt)} · not opened` : 'Link not opened yet';
 };
 
@@ -35,7 +36,7 @@ export default function CoachDashboard({ data }) {
     { id: 'waiting', label: `Waiting ${waiting.length}` },
     { id: 'ready', label: `Ready ${ready.length}` },
   ];
-  const order = { review: 0, opened: 1, waiting: 2, ready: 3 };
+  const order = { review: 0, opened: 1, waiting: 2, draft: 2.5, ready: 3 };
   const shown = (filter === 'all' ? players : filter === 'waiting' ? waiting : players.filter((p) => p.status === filter))
     .slice()
     .sort((a, b) => order[a.status] - order[b.status]);
@@ -55,6 +56,13 @@ export default function CoachDashboard({ data }) {
             <div className="due">{closed ? due : `${due} · ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}</div>
           </div>
         </div>
+
+        {players.some((p) => p.status === 'draft') && (
+          <a href="#/coach/setup/roster" className="import-card" style={{ textDecoration: 'none' }}>
+            <div><b>{players.filter((p) => p.status === 'draft').length} links not sent yet</b><span>Finish setup to text them.</span></div>
+            <span className="import-go">Finish</span>
+          </a>
+        )}
 
         <div className="progress">
           <div className="progress-top">
