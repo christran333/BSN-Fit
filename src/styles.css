@@ -393,3 +393,22 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .x-btn { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
 .x-btn:hover { background: var(--bg); }
 .pinfo .flow-tag { align-self: flex-start; margin-top: 5px; font-size: 11px; padding: 3px 7px; }
+
+/* ── compact demo panel: everything fits without scrolling ── */
+.demo-panel { width: 300px; gap: 9px; flex: none; }
+.demo-title { font-size: 34px; }
+.demo-section { margin-top: 2px; font-size: 11px; }
+.demo-people { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: -4px; }
+.demo-people button { padding: 7px 10px; border-radius: 10px; }
+.demo-people button b { font-size: 13.5px; }
+.demo-people button span { font-size: 11.5px; line-height: 1.3; }
+.demo-seg { margin-top: -4px; }
+.demo-seg button { padding: 6px; font-size: 13px; }
+.demo-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: -4px; }
+.demo-tabs button { padding: 6px 8px; gap: 7px; font-size: 13.5px; }
+.demo-tab-n { width: 19px; height: 19px; font-size: 11px; }
+.demo-note { margin-top: -3px; font-size: 12.5px; line-height: 1.4; }
+.demo-journey { flex-wrap: nowrap; gap: 3px; margin-top: -4px; font-size: 12.5px; }
+.demo-journey a { padding: 5px 8px; white-space: nowrap; }
+.demo-foot { margin-top: 2px; gap: 10px; }
+.demo-foot a { font-size: 13px; }

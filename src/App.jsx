@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useRoute } from './router.js';
 import { useStore, store, SCENARIOS, PEOPLE, DEMO_TOKEN, canHaveHeight } from './store.js';
 import PhoneFrame from './components/PhoneFrame.jsx';
@@ -24,9 +24,29 @@ function screenFor(path, data) {
   return <CoachDashboard data={data} />;
 }
 
+/** shrink the demo panel to fit the window, the same way the phone does */
+function useFitHeight(deps) {
+  const ref = useRef(null);
+  const [zoom, setZoom] = useState(1);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const el = ref.current;
+      if (!el) return;
+      const z = parseFloat(getComputedStyle(el).zoom) || 1;
+      const natural = el.getBoundingClientRect().height / z;
+      setZoom(Math.min(1, (window.innerHeight - 40) / natural));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, deps);
+  return [ref, zoom];
+}
+
 export default function App() {
   const path = useRoute();
   const data = useStore();
+  const [panelRef, panelZoom] = useFitHeight([data.demo?.token, data.demo?.heightOnFile, data.demo?.scenario, path]);
   const demo = data.demo || { token: DEMO_TOKEN, scenario: 'first' };
   const person = data.players.find((p) => p.token === demo.token);
   const scenario = SCENARIOS.find((sc) => sc.id === demo.scenario);
@@ -43,7 +63,7 @@ export default function App() {
 
   return (
     <div className="stage">
-      <aside className="demo-panel">
+      <aside className="demo-panel" ref={panelRef} style={{ zoom: panelZoom }}>
         <div>
           <div className="demo-kicker">Prototype</div>
           <h1 className="disp demo-title">Fit Check</h1>
@@ -81,7 +101,7 @@ export default function App() {
             </button>
           ))}
         </div>
-        <p className="demo-note">{scenario?.note} Reply buttons in the thread work, so you can keep going from here.</p>
+        <p className="demo-note">{scenario?.note} Reply buttons in the thread work.</p>
 
         <div className="demo-section">Their journey</div>
         <nav className="demo-journey" aria-label="Journey">

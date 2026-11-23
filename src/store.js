@@ -83,9 +83,9 @@ export const TEAM = {
 // thread from the first text up to that moment, so it reads as one story.
 export const PEOPLE = [
   { token: 'jordan-x2p', label: 'Jordan', sub: '17 · no size on file' },
-  { token: 'mia-7kq', label: "Mia's parent", sub: 'Mia is 10 · text goes to a parent' },
+  { token: 'mia-7kq', label: "Mia's parent", sub: '10 · text goes to parent' },
   { token: 'maya-p8w', label: 'Maya', sub: '15 · wore S last season' },
-  { token: 'dana-a91', label: 'Dana', sub: '24 · returning, same as last year' },
+  { token: 'dana-a91', label: 'Dana', sub: '24 · same as last year' },
 ];
 // last season's height, used when the "size + height on file" tab is on
 const HEIGHT_ON_FILE = { 'mia-7kq': 52, 'maya-p8w': 63 };
@@ -94,7 +94,7 @@ export const SCENARIOS = [
   { id: 'first', label: 'First text', note: 'No obstacles. The invite, then what to expect.' },
   { id: 'ignored', label: 'Ignored it', note: 'Three days later, no answer yet.' },
   { id: 'halfway', label: 'Quit half-way', note: 'Opened the link, answered some, left.' },
-  { id: 'later', label: 'Remind me later', note: 'Tapped "Remind me later". This is the next day.' },
+  { id: 'later', label: 'Remind later', note: 'Tapped "Remind me later". This is the next day.' },
   { id: 'late', label: 'After deadline', note: 'The order closed before they answered.' },
   { id: 'done', label: 'Done', note: 'Submitted. Confirmation text, and the coach has the size.' },
 ];
