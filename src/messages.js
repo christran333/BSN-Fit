@@ -46,32 +46,63 @@ export function teamStats(players, p) {
 }
 
 /** quick-reply buttons under a BSN text (RCS suggested replies) */
-export const REPLIES = {
+const BASE_REPLIES = {
   intro: [{ id: 'go', label: "Let's go" }, { id: 'later', label: 'Remind me later' }],
   nudge: [{ id: 'go', label: 'Finish now' }, { id: 'tomorrow', label: 'Remind me tomorrow' }],
-  partial: [{ id: 'go', label: "Let's go" }, { id: 'later', label: 'Remind me later' }],
+  partial: [{ id: 'go', label: 'Finish now' }, { id: 'later', label: 'Remind me later' }],
   reminder: [{ id: 'go', label: "Let's go" }, { id: 'later', label: 'Remind me later' }],
   late: [{ id: 'batch', label: 'Add me to next batch' }, { id: 'notnow', label: 'Not now' }],
 };
+export function repliesFor(msg, p) {
+  const base = BASE_REPLIES[msg?.kind];
+  if (!base) return null;
+  // returning adults can confirm last year's size without opening the link
+  if (msg.kind === 'late' && flowFor(p) === 'parent') {
+    return [{ id: 'batch', label: `Add ${p.name.split(' ')[0]} to next batch` }, base[1]];
+  }
+  if (flowFor(p) === 'returning' && ['intro', 'nudge', 'reminder'].includes(msg.kind)) {
+    return [{ id: 'same', label: `Same as last year (${p.lastSize})` }, { id: 'go', label: 'Check my fit' }];
+  }
+  return base;
+}
+export const ALL_REPLIES = Object.values(BASE_REPLIES).flat();
 
-/** BSN's answer to each quick reply (null = just open the link) */
+/** BSN's answer to each quick reply (null = no text back) */
 export function ackFor(replyId, p, team) {
   const first = p.name.split(' ')[0];
   const parent = flowFor(p) === 'parent';
   switch (replyId) {
     case 'later': return "No problem. We'll text you again tomorrow.";
     case 'tomorrow': return `Got it. We'll text you tomorrow. Sizes still lock on ${fmtDue(team)}.`;
-    case 'batch': return `Done. ${parent ? first + " is" : "You're"} on the list for the next batch. We'll text the link when it opens.`;
+    case 'batch': return `Done. ${parent ? first + ' is' : "You're"} on the list for the next batch. We'll text the link when it opens.`;
     case 'notnow': return `Okay. If you change your mind, ${team.coach} can add ${parent ? first : 'you'} later.`;
     default: return null;
   }
+}
+
+/** the link preview card, written for whoever gets the text */
+export function cardFor(p, team) {
+  const first = p.name.split(' ')[0];
+  const flow = flowFor(p);
+  return {
+    kicker: `${team.school} · ${team.program}`,
+    title: {
+      parent: `${first}'s uniform size`,
+      returning: `${first}, same as last year?`,
+      teen: `${first}'s ${team.season} fit check`,
+      standard: `${first}'s ${team.season} fit check`,
+    }[flow],
+    foot: flow === 'returning' ? `Last order: ${sizeLabel(p.lastSize, p.cut)}` : `5 questions · due ${fmtDue(team)}`,
+  };
 }
 
 /** returns { lead, link, after } so the link can be rendered as a link */
 export function messageParts(p, team, msg) {
   const first = p.name.split(' ')[0];
   const parent = flowFor(p) === 'parent';
-  const hi = parent ? 'Hi' : `Hi ${first},`;
+  // "Hi Jordan, you're…" / parents: "Hi! Mia is…"
+  const hey = (rest) => (parent ? `Hi! ${rest[0].toUpperCase()}${rest.slice(1)}` : `Hi ${first}, ${rest}`);
+  const hi = parent ? 'Hi!' : `Hi ${first},`;
   const your = parent ? `${first}'s` : 'your';
   const due = fmtDue(team);
 
@@ -81,15 +112,17 @@ export function messageParts(p, team, msg) {
       return { lead: msg.text, link: null, after: null };
 
     case 'intro': {
-      const s = msg.stats;
-      const proof = s && s.done > 0 ? `, and ${s.done} of ${s.total} teammates already have` : '';
-      return {
-        lead: parent
-          ? `Hi! ${first}'s ${team.short} jersey order is coming together. To get the size right, we'll ask ${QUESTIONS} quick questions. Most parents finish in under a minute${proof}. Ready?`
-          : `${hi} your ${team.short} jersey order is coming together. To get your size right, we'll ask ${QUESTIONS} quick questions. Most players finish in under a minute${proof}. Ready?`,
-        link: null,
-        after: null,
-      };
+      const st = msg.stats;
+      const proof = st && st.done > 0 ? `, and ${st.done} of ${st.total} teammates already have` : '';
+      const flow = flowFor(p);
+      const last = p.lastSize ? sizeLabel(p.lastSize, p.cut) : null;
+      const lead = {
+        parent: `Hi! ${first}'s ${team.short} uniform order is coming together. ${last ? `${first} wore ${last} last time, and kids grow fast, so we` : 'We'}'ll ask ${QUESTIONS} quick questions to get the size right. Most parents finish in about a minute${proof}. Ready?`,
+        returning: `${hi} last season you wore ${last} and kept it. If nothing's changed, tap below and you're done. Want to double-check? It's ${QUESTIONS} quick taps.`,
+        teen: `${hi} you wore ${last} last season, and a year can change a lot. We'll ask ${QUESTIONS} quick questions to get your size right. Most players finish in about a minute${proof}. Ready?`,
+        standard: `${hi} your ${team.short} jersey order is coming together. To get your size right, we'll ask ${QUESTIONS} quick questions. Most players finish in about a minute${proof}. Ready?`,
+      }[flow];
+      return { lead, link: null, after: null };
     }
 
     case 'nudge': {
@@ -98,10 +131,11 @@ export function messageParts(p, team, msg) {
       // only say "one of the last" when it's actually true
       const last = s && s.left <= Math.ceil((s.total + 1) / 2);
       const opener = last
-        ? `${hi} ${parent ? `${first} is` : "you're"} one of the last few players without a size.`
-        : `${hi} ${team.coach} still needs ${your} size.`;
+        ? hey(`${parent ? `${first} is` : "you're"} one of the last few players without a size.`)
+        : hey(`${team.coach} still needs ${your} size.`);
+      const effort = flowFor(p) === 'returning' ? 'If nothing changed, it\'s one tap.' : `It takes ${MINUTE}.`;
       return {
-        lead: `${opener} Sizes lock on ${due}, ${num(d)} day${d === 1 ? '' : 's'} left. Want to finish now? It takes ${MINUTE}.`,
+        lead: `${opener} Sizes lock on ${due}, ${num(d)} day${d === 1 ? '' : 's'} left. Want to finish now? ${effort}`,
         link: shortLink(p),
         after: null,
       };
@@ -111,8 +145,15 @@ export function messageParts(p, team, msg) {
       const answered = msg.answered ?? p.answersCount ?? 3;
       const left = QUESTIONS - answered;
       const pct = Math.round((answered / QUESTIONS) * 100);
+      if (left <= 0) {
+        return {
+          lead: `${hey(`${your} answers are saved, you just didn't hit submit.`)} Want to finish now? It's one tap.`,
+          link: shortLink(p),
+          after: null,
+        };
+      }
       return {
-        lead: `${hi} we're still waiting for ${your} size. You're ${pct}% done, and the last ${num(left)} question${left === 1 ? '' : 's'} take${left === 1 ? 's' : ''} less than a minute. Want to finish now?`,
+        lead: `${hey(`we're still waiting for ${your} size.`)} You're ${pct}% done, and the last ${num(left)} question${left === 1 ? '' : 's'} take${left === 1 ? 's' : ''} less than a minute. Want to finish now?`,
         link: shortLink(p),
         after: null,
       };
@@ -120,14 +161,14 @@ export function messageParts(p, team, msg) {
 
     case 'reminder':
       return {
-        lead: `${hi} just a reminder to send ${your} uniform size to ${team.coach} for ${team.season} ${team.program}. It only takes ${MINUTE}. Ready to start?`,
+        lead: `${hey('just a reminder to send')} ${your} uniform size to ${team.coach} for ${team.season} ${team.program}. It only takes ${MINUTE}. Ready to start?`,
         link: shortLink(p),
         after: null,
       };
 
     case 'late':
       return {
-        lead: `${hi} sizes for this order closed on ${due}. We can still add ${parent ? first : 'you'} to the next batch so ${parent ? "they're" : "you're"} covered. Want us to do that?`,
+        lead: `${hey('sizes for this order closed on')} ${due}. We can still add ${parent ? first : 'you'} to the next batch so ${parent ? "they're" : "you're"} covered. Want us to do that?`,
         link: null,
         after: null,
       };

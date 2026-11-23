@@ -17,17 +17,18 @@ Open the deployed site on a phone or laptop. On a laptop it shows inside a phone
 | Jordan | Says she's an S, no size on file. Indirect fit questions catch that she needs an M |
 | Dana | Adult, same as last year. Answers are filled in, so it's one tap |
 
-### Text scenarios
+### Scenarios
 
-The demo panel's **Texts to Jordan** tabs rebuild Jordan's text thread up to each moment, so it reads as one conversation:
+The demo panel works like this: **pick who gets the text** (Jordan, Mia's parent, or Dana), then **pick a scenario**. Each scenario replays that person's text thread from the first invite up to that moment:
 
-1. **First text**: invite with link preview, then a follow-up that says what to expect (5 questions, about a minute, how many teammates are done)
+1. **First text**: invite with a link preview made for them, then a follow-up that says what to expect
 2. **Ignored it**: three days later, deadline reminder
-3. **Quit half-way**: answered 3 of 5; the text says 60% done, and the link resumes where she stopped
-4. **Remind me later**: she tapped it; this is the next day
-5. **After deadline**: order closed; offer to add her to the next batch
+3. **Quit half-way**: the text says how far along they got; the link resumes where they stopped
+4. **Remind me later**: they tapped it; this is the next day
+5. **After deadline**: order closed; offer the next batch (the link shows a "join the next batch" page too)
+6. **Done**: confirmation text; the coach has the size
 
-The reply buttons in the thread work (RCS-style suggested replies), so you can click through from any tab. The coach's **Nudge** button sends the right follow-up for each player automatically. All text copy is in `src/messages.js`.
+**Their journey** jumps between that person's screens: Text › Fit check › Result › Coach view. Reply buttons in the thread work (RCS-style suggested replies). Dana can reply **Same as last year** and submit without opening the link. All text copy is in `src/messages.js`.
 
 Everything is saved in the browser (localStorage), so a submit on an athlete link shows up on the coach dashboard right away. Use **Reset demo data** to start over.
 

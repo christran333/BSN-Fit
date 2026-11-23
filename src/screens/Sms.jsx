@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { messagesFor, messageParts, threadTime, REPLIES } from '../messages.js';
+import { messagesFor, messageParts, threadTime, repliesFor, cardFor } from '../messages.js';
 import { store } from '../store.js';
 import { go } from '../router.js';
 
@@ -20,7 +20,10 @@ export default function Sms({ data, token }) {
   const { team } = data;
   // quick replies only show under the newest BSN text, until they answer it
   const lastIdx = msgs.length - 1;
-  const live = REPLIES[msgs[lastIdx]?.kind] && !(p.status === 'ready' || p.status === 'review') ? lastIdx : -1;
+  const done = p.status === 'ready' || p.status === 'review';
+  const liveReplies = !done && !p.nextBatch && !p.declined ? repliesFor(msgs[lastIdx], p) : null;
+  const live = liveReplies ? lastIdx : -1;
+  const card = cardFor(p, team);
   const tap = (r) => {
     store.quickReply(p.id, r.id, r.label);
     if (r.id === 'go') setTimeout(() => go(`/r/${p.token}`), 650);
@@ -62,15 +65,12 @@ export default function Sms({ data, token }) {
               {m.kind === 'invite' && (
                 <a href={href} className="sms-card">
                   <div className="sms-card-art">
-                    <div className="sms-card-team">
-                      <span className="sms-card-crest" aria-hidden="true">E</span>
-                      <span>{team.school}<br />{team.program}</span>
-                    </div>
-                    <div className="sms-card-body">{team.coach} is requesting sizes for the {team.season} season.</div>
-                    <img className="sms-card-bsn" src={`${import.meta.env.BASE_URL}bsn-mark.png`} alt="BSN Sports" />
+                    <span className="sms-card-kicker">{card.kicker}</span>
+                    <span className="sms-card-title-big">{card.title}</span>
+                    <span className="sms-card-foot">{card.foot}</span>
                   </div>
                   <div className="sms-card-meta">
-                    <div className="sms-card-title">Fit Check · {team.order}</div>
+                    <div className="sms-card-title">Fit Check from {team.coach}</div>
                     <div className="sms-card-domain">fitcheck.team</div>
                   </div>
                 </a>
@@ -78,7 +78,7 @@ export default function Sms({ data, token }) {
               {i === 0 && <div className="bubble small">Reply STOP to opt out.</div>}
               {i === live && (
                 <div className="qr" role="group" aria-label="Quick replies">
-                  {REPLIES[m.kind].map((r) => (
+                  {liveReplies.map((r) => (
                     <button key={r.id} className="qr-btn" onClick={() => tap(r)}>{r.label}</button>
                   ))}
                 </div>

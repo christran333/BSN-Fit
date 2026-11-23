@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRoute } from './router.js';
-import { useStore, store, SCENARIOS, DEMO_TOKEN } from './store.js';
+import { useStore, store, SCENARIOS, PEOPLE, DEMO_TOKEN } from './store.js';
 import PhoneFrame from './components/PhoneFrame.jsx';
 import CoachDashboard from './screens/CoachDashboard.jsx';
 import AddPlayer from './screens/AddPlayer.jsx';
@@ -24,49 +24,61 @@ function screenFor(path, data) {
 export default function App() {
   const path = useRoute();
   const data = useStore();
-  const demo = [
-    { label: 'Coach dashboard', href: '#/coach' },
-    { label: 'Mia · parent of a 10-year-old', href: '#/r/mia-7kq' },
-    { label: 'Jordan · says S, no size on file', href: '#/r/jordan-x2p' },
-    { label: 'Dana · same as last year', href: '#/r/dana-a91' },
-  ];
+  const demo = data.demo || { token: DEMO_TOKEN, scenario: 'first' };
+  const person = data.players.find((p) => p.token === demo.token);
+  const scenario = SCENARIOS.find((sc) => sc.id === demo.scenario);
+  const submitted = person && (person.status === 'ready' || person.status === 'review');
+
+  const pick = (token, id) => { store.scenario(token, id); window.location.hash = `/sms/${token}`; };
+  const journey = person ? [
+    { label: 'Text', href: `#/sms/${person.token}` },
+    { label: 'Fit check', href: `#/r/${person.token}` },
+    { label: 'Result', href: `#/r/${person.token}/done`, off: !submitted },
+    { label: 'Coach view', href: `#/coach/p/${person.id}` },
+  ] : [];
+  const here = `#${path}`.split('?')[0];
+
   return (
     <div className="stage">
       <aside className="demo-panel">
-        <div className="demo-kicker">Prototype</div>
-        <h1 className="disp demo-title">Fit Check</h1>
-        <p className="demo-copy">
-          Coaches see the roster. Each athlete gets one link with five questions picked for them.
-          Answers on a link show up on the coach dashboard live.
-        </p>
-        <div className="demo-section">Texts to Jordan</div>
-        <div className="demo-tabs" role="tablist" aria-label="Text scenarios">
+        <div>
+          <div className="demo-kicker">Prototype</div>
+          <h1 className="disp demo-title">Fit Check</h1>
+        </div>
+
+        <div className="demo-section">Who gets the text</div>
+        <div className="demo-people" role="tablist" aria-label="Person">
+          {PEOPLE.map((pp) => (
+            <button key={pp.token} role="tab" aria-selected={demo.token === pp.token} onClick={() => pick(pp.token, demo.scenario)}>
+              <b>{pp.label}</b><span>{pp.sub}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="demo-section">Scenario</div>
+        <div className="demo-tabs" role="tablist" aria-label="Scenario">
           {SCENARIOS.map((sc, i) => (
-            <button
-              key={sc.id}
-              role="tab"
-              aria-selected={data.scenario === sc.id}
-              onClick={() => { store.scenario(sc.id); window.location.hash = `/sms/${DEMO_TOKEN}`; }}
-            >
+            <button key={sc.id} role="tab" aria-selected={demo.scenario === sc.id} onClick={() => pick(demo.token, sc.id)}>
               <span className="demo-tab-n">{i + 1}</span>{sc.label}
             </button>
           ))}
         </div>
-        <p className="demo-note">
-          {SCENARIOS.find((sc) => sc.id === data.scenario)?.note}{' '}
-          The reply buttons in the thread work, so you can carry on from here.
-        </p>
-        <div className="demo-section">Screens</div>
-        <nav className="demo-links" aria-label="Demo shortcuts">
-          {demo.map((d) => (
-            <a key={d.href} href={d.href} className={`#${path}`.replace(/\/done.*/, '') === d.href ? 'on' : ''}>
-              {d.label}
-            </a>
+        <p className="demo-note">{scenario?.note} Reply buttons in the thread work, so you can keep going from here.</p>
+
+        <div className="demo-section">Their journey</div>
+        <nav className="demo-journey" aria-label="Journey">
+          {journey.map((j, i) => (
+            <React.Fragment key={j.label}>
+              {i > 0 && <span aria-hidden="true">›</span>}
+              <a href={j.off ? undefined : j.href} aria-disabled={j.off || undefined} className={here === j.href ? 'on' : ''}>{j.label}</a>
+            </React.Fragment>
           ))}
         </nav>
-        <button className="demo-reset" onClick={() => { store.reset(); window.location.hash = '/coach'; }}>
-          Reset demo data
-        </button>
+
+        <div className="demo-foot">
+          <a href="#/coach" className={here === '#/coach' ? 'on' : ''}>Coach dashboard</a>
+          <button className="demo-reset" onClick={() => pick(demo.token, demo.scenario)}>Restart scenario</button>
+        </div>
       </aside>
       <PhoneFrame path={path} overlay={<Notice data={data} />}>{screenFor(path, data)}</PhoneFrame>
     </div>

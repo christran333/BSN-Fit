@@ -92,7 +92,7 @@ export default function CoachDashboard({ data }) {
               <div className="pinfo">
                 <div className="pname">
                   {p.name} {p.number != null && <span>#{p.number}</span>}
-                  {p.token === 'jordan-x2p' && (
+                  {p.token === data.demo?.token && (
                     <svg className="demo-star" width="12" height="12" viewBox="0 0 24 24" role="img" aria-label="Text message demo player">
                       <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="currentColor" />
                     </svg>

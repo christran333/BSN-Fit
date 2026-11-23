@@ -2,10 +2,10 @@
 // works with no backend. Coach and athlete screens read the same data,
 // so a submit on one link shows up on the dashboard right away.
 import { useSyncExternalStore } from 'react';
-import { recommend, flowFor, questionsFor } from './sizing.js';
-import { nudgeKindFor, teamStats, daysLeft, ackFor, REPLIES } from './messages.js';
+import { recommend, flowFor, questionsFor, defaultAnswers } from './sizing.js';
+import { nudgeKindFor, teamStats, daysLeft, ackFor, ALL_REPLIES } from './messages.js';
 
-const KEY = 'bsn-fitcheck-v3';
+const KEY = 'bsn-fitcheck-v4';
 export const DEMO_TOKEN = 'jordan-x2p';
 const listeners = new Set();
 
@@ -64,7 +64,7 @@ function seed() {
     team: { ...TEAM, dueDate: daysFromNow(4) },
     players,
     notice: null,
-    scenario: 'first',
+    demo: { token: DEMO_TOKEN, scenario: 'first' },
   };
 }
 
@@ -78,34 +78,46 @@ export const TEAM = {
   coach: 'Coach Newman',
 };
 
-// ── text scenarios ─────────────────────────────────────────────
-// Each one rebuilds Jordan's thread from the start up to that moment,
-// so the demo always shows one continuous conversation.
+// ── demo scenarios ─────────────────────────────────────────────
+// Pick a person, then a moment. Each scenario rebuilds that person's
+// thread from the first text up to that moment, so it reads as one story.
+export const PEOPLE = [
+  { token: 'jordan-x2p', label: 'Jordan', sub: '17 · no size on file' },
+  { token: 'mia-7kq', label: "Mia's parent", sub: 'Mia is 10 · text goes to a parent' },
+  { token: 'dana-a91', label: 'Dana', sub: '24 · returning, same as last year' },
+];
 export const SCENARIOS = [
-  { id: 'first', label: 'First text', note: 'No obstacle. Invite, then what to expect.' },
-  { id: 'ignored', label: 'Ignored it', note: 'Three days later, no answer.' },
-  { id: 'halfway', label: 'Quit half-way', note: 'Answered 3 of 5, then left.' },
-  { id: 'later', label: 'Remind me later', note: 'Tapped "Remind me later". This is later.' },
-  { id: 'late', label: 'After deadline', note: 'Order closed before Jordan answered.' },
+  { id: 'first', label: 'First text', note: 'No obstacles. The invite, then what to expect.' },
+  { id: 'ignored', label: 'Ignored it', note: 'Three days later, no answer yet.' },
+  { id: 'halfway', label: 'Quit half-way', note: 'Opened the link, answered some, left.' },
+  { id: 'later', label: 'Remind me later', note: 'Tapped "Remind me later". This is the next day.' },
+  { id: 'late', label: 'After deadline', note: 'The order closed before they answered.' },
+  { id: 'done', label: 'Done', note: 'Submitted. Confirmation text, and the coach has the size.' },
 ];
 
-function buildScenario(id) {
+function buildScenario(token = DEMO_TOKEN, id = 'first') {
   const s = seed();
-  s.scenario = id;
-  const p = s.players.find((x) => x.token === DEMO_TOKEN);
+  s.demo = { token, scenario: id };
+  const p = s.players.find((x) => x.token === token);
   const msg = (kind, at, extra = {}) => ({ kind, at, ...extra });
   const start = (daysBack) => {
     const at = id === 'first' ? minsAgo(1) : hoursAgo(daysBack * 24);
     p.sentAt = at;
+    p.status = 'waiting';
+    delete p.answersCount;
     p.messages = [msg('invite', at), msg('intro', plusSec(at, 2), { stats: teamStats(s.players, p) })];
     return at;
   };
   const reply = (replyId, at) => {
-    const all = Object.values(REPLIES).flat();
-    p.messages.push(msg('reply', at, { text: all.find((r) => r.id === replyId).label }));
+    const r = [...ALL_REPLIES, { id: 'same', label: `Same as last year (${p.lastSize})` }].find((x) => x.id === replyId);
+    p.messages.push(msg('reply', at, { text: r.label }));
     const ack = ackFor(replyId, p, s.team);
     if (ack) p.messages.push(msg('ack', plusSec(at, 3), { text: ack }));
   };
+  // a plausible set of answers: defaults, else the second option
+  const sample = (n) => Object.fromEntries(
+    questionsFor(p).slice(0, n).map((q) => [q.id, defaultAnswers(p)[q.id] ?? q.options?.[1]?.value ?? q.default]),
+  );
 
   if (id === 'first') start(0);
   if (id === 'ignored') {
@@ -115,10 +127,10 @@ function buildScenario(id) {
   if (id === 'halfway') {
     const at = start(2);
     reply('go', plusSec(at, 120));
+    p.draft = { ...defaultAnswers(p), ...sample(3) };
+    p.answersCount = questionsFor(p).filter((q) => p.draft[q.id] !== undefined).length;
     p.status = 'opened';
-    p.answersCount = 3;
-    p.draft = Object.fromEntries(questionsFor(p).slice(0, 3).map((q) => [q.id, q.options?.[1]?.value ?? q.default]));
-    p.messages.push(msg('partial', minsAgo(1), { answered: 3 }));
+    p.messages.push(msg('partial', minsAgo(1), { answered: p.answersCount }));
   }
   if (id === 'later') {
     const at = start(1);
@@ -131,6 +143,17 @@ function buildScenario(id) {
     p.messages.push(msg('nudge', plusSec(at, 3 * 864e2), { stats: teamStats(s.players, p), daysLeft: 2 }));
     p.messages.push(msg('late', minsAgo(1)));
   }
+  if (id === 'done') {
+    const at = start(1);
+    const returning = flowFor(p) === 'returning';
+    reply(returning ? 'same' : 'go', plusSec(at, 240));
+    p.answers = returning ? defaultAnswers(p) : sample(5);
+    p.rec = recommend(p, p.answers);
+    p.finalSize = p.rec.size;
+    p.status = p.rec.needsReview ? 'review' : 'ready';
+    p.submittedAt = plusSec(at, 300);
+    p.messages.push(msg('confirm', p.submittedAt, { size: p.finalSize }));
+  }
   return s;
 }
 
@@ -140,7 +163,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) return { ...JSON.parse(raw), notice: null };
   } catch (e) { /* ignore */ }
-  return buildScenario('first');
+  return buildScenario();
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
@@ -159,8 +182,8 @@ const patchPlayer = (id, patch) =>
 export const store = {
   get: () => state,
   subscribe: (l) => { listeners.add(l); return () => listeners.delete(l); },
-  reset: () => { state = buildScenario('first'); save(); },
-  scenario: (id) => { state = buildScenario(id); save(); },
+  reset: () => { const d = state.demo || {}; state = buildScenario(d.token, 'first'); save(); },
+  scenario: (token, id) => { state = buildScenario(token, id); save(); },
 
   addPlayer(input) {
     const p = {
@@ -211,6 +234,11 @@ export const store = {
       });
       return s;
     });
+    // returning adult confirmed last year's size right from the text
+    if (replyId === 'same') {
+      const p = state.players.find((x) => x.id === id);
+      setTimeout(() => store.submit(id, { ...defaultAnswers(p), ...(p.draft || {}) }), 700);
+    }
     // "remind me later": in the demo, "later" arrives a few seconds from now
     if (replyId === 'later' || replyId === 'tomorrow') {
       setTimeout(() => {
@@ -225,6 +253,15 @@ export const store = {
         });
       }, 3500);
     }
+  },
+  joinNextBatch(id) {
+    const at = new Date().toISOString();
+    update((s) => {
+      s.players = s.players.map((p) => (p.id === id
+        ? { ...p, nextBatch: true, messages: [...(p.messages || []), { kind: 'ack', at, text: ackFor('batch', p, s.team) }] }
+        : p));
+      return s;
+    });
   },
   /** half-finished answers, so a "you're 60% done" text knows where they stopped */
   saveDraft(id, draft, count) {

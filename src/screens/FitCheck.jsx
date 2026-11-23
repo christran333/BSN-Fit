@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { store } from '../store.js';
 import { flowFor, questionsFor, defaultAnswers, recommend, sizeLabel, shortSize, formatHeight } from '../sizing.js';
 import { go } from '../router.js';
-import { Chips } from '../components/ui.jsx';
+import { Chips, Check } from '../components/ui.jsx';
+import { isClosed } from '../messages.js';
 
 export default function FitCheck({ data, token }) {
   const p = data.players.find((x) => x.token === token);
@@ -15,6 +16,33 @@ export default function FitCheck({ data, token }) {
 
   const flow = flowFor(p);
   const first = p.name.split(' ')[0];
+  const submitted = p.status === 'ready' || p.status === 'review';
+
+  // link opened after the order closed: offer the next batch instead
+  if (isClosed(data.team) && !submitted) {
+    const due = new Date(data.team.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return (
+      <div className="screen white">
+        <div className="center-msg" style={{ alignItems: 'flex-start', textAlign: 'left', justifyContent: 'flex-start', paddingTop: 28 }}>
+          <div className="kicker">{data.team.name}</div>
+          <h1 className="disp" style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>
+            {p.nextBatch ? "You're on the list" : `Sizes closed on ${due}`}
+          </h1>
+          <p className="lede" style={{ margin: 0 }}>
+            {p.nextBatch
+              ? `We'll text ${flow === 'parent' ? `you a new link for ${first}` : 'you a new link'} when the next batch opens. Nothing else to do.`
+              : `${data.team.coach}'s ${data.team.season} order has already gone in. ${flow === 'parent' ? `${first} can` : 'You can'} still get a uniform in the next batch.`}
+          </p>
+          {p.nextBatch && <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={24} width={1.6} /></div>}
+        </div>
+        {!p.nextBatch && (
+          <div className="screen-foot">
+            <button className="btn btn-red" onClick={() => store.joinNextBatch(p.id)}>Add {flow === 'parent' ? first : 'me'} to the next batch</button>
+          </div>
+        )}
+      </div>
+    );
+  }
   const set = (id) => (v) => setAnswers((a) => {
     const next = { ...a, [id]: v };
     // keep their place, so a reminder can say how far along they are
