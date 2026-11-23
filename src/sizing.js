@@ -86,9 +86,9 @@ export function flowFor(p) {
 }
 
 export const FLOW_META = {
-  parent: { title: 'Parent growth check', time: '~40 sec', audience: 'parent' },
-  teen: { title: 'Growth + fit check', time: '~30 sec', audience: 'athlete' },
-  standard: { title: 'Fit check', time: '~30 sec', audience: 'athlete' },
+  parent: { title: 'Parent growth check', time: '~1 min', audience: 'parent' },
+  teen: { title: 'Growth + fit check', time: '~1 min', audience: 'athlete' },
+  standard: { title: 'Fit check', time: '~1 min', audience: 'athlete' },
   returning: { title: 'Same-as-last-year check', time: '~5 sec', audience: 'athlete' },
 };
 

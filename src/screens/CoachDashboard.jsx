@@ -11,6 +11,8 @@ const subFor = (p) => {
     if (p.lastSize && p.finalSize === p.lastSize) return 'Same as last order';
     return 'Fit check done';
   }
+  if (p.nextBatch) return 'Asked for the next batch';
+  if (p.declined) return 'Said not now';
   if (p.nudgedAt) return `Nudged ${timeAgo(p.nudgedAt)}`;
   if (p.status === 'opened') return p.answersCount ? `Opened · ${p.answersCount} of 5 answered` : 'Opened · not submitted';
   return p.sentAt ? `Link sent ${timeAgo(p.sentAt)} · not opened` : 'Link not opened yet';
@@ -24,6 +26,7 @@ export default function CoachDashboard({ data }) {
   const review = players.filter((p) => p.status === 'review');
   const waiting = players.filter((p) => p.status === 'waiting' || p.status === 'opened');
   const daysLeft = Math.max(0, Math.ceil((new Date(team.dueDate) - Date.now()) / 864e5));
+  const closed = new Date(team.dueDate) <= Date.now();
   const due = new Date(team.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   const tabs = [
@@ -48,8 +51,8 @@ export default function CoachDashboard({ data }) {
             <h1 className="disp h1">{team.order}</h1>
           </div>
           <div style={{ paddingTop: 4 }}>
-            <div className="due-label">Order due</div>
-            <div className="due">{due} · {daysLeft} days</div>
+            <div className="due-label">{closed ? 'Order closed' : 'Order due'}</div>
+            <div className="due">{closed ? due : `${due} · ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}</div>
           </div>
         </div>
 
@@ -60,7 +63,7 @@ export default function CoachDashboard({ data }) {
               <span style={{ fontSize: 14, color: '#c9ccd1' }}>fit checks in</span>
             </div>
             <button className="btn btn-red" style={{ height: 36, width: 'auto', padding: '0 14px', fontSize: 14, borderRadius: 10 }} onClick={nudgeAll} disabled={!waiting.length}>
-              Nudge {waiting.length}
+              {closed ? `Offer next batch · ${waiting.length}` : `Nudge ${waiting.length}`}
             </button>
           </div>
           <div className="bar" aria-hidden="true">
@@ -106,7 +109,7 @@ export default function CoachDashboard({ data }) {
                   className="btn-sm"
                   onClick={(e) => { e.preventDefault(); store.nudge(p.id); }}
                 >
-                  Nudge
+                  {closed ? 'Text' : 'Nudge'}
                 </button>
               )}
             </a>

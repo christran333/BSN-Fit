@@ -262,6 +262,7 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .sms-name svg { color: #8e8e93; margin-top: 1px; }
 .sms-video { justify-self: end; color: #007aff; display: flex; margin-top: -16px; }
 .sms-thread { padding: 12px 14px 16px; gap: 6px; }
+.sms-thread > * { flex-shrink: 0; }
 .sms-meta { text-align: center; font-size: 11.5px; color: #8e8e93; line-height: 1.35; margin: 4px 0 10px; }
 .sms-meta b { font-weight: 600; }
 .bubble {
@@ -270,13 +271,28 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 }
 .bubble a { color: #007aff; text-decoration: underline; }
 .bubble.small { font-size: 15px; }
+.bubble.me { align-self: flex-end; background: #007aff; color: #fff; }
+.bubble.me.is-new { transform-origin: bottom right; }
+/* RCS-style suggested replies under the newest text */
+.qr { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 2px; }
+.qr-btn {
+  border: 1.5px solid #007aff; background: #fff; color: #007aff; font: inherit; font-size: 15px; font-weight: 600;
+  height: 36px; padding: 0 15px; border-radius: 18px; cursor: pointer;
+}
+.qr-btn:active { background: #e6f0ff; }
 .sms-card { align-self: flex-start; width: 78%; border-radius: 19px; overflow: hidden; background: #e9e9eb; text-decoration: none; color: #000; display: block; }
 .sms-card-art {
-  height: 150px; background: var(--ink); color: #fff; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; padding: 16px; position: relative;
+  aspect-ratio: 1.91 / 1; color: #fff; display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+  padding: 13px 14px 12px; position: relative; font-family: Inter, sans-serif;
+  background: radial-gradient(120% 90% at 85% 10%, #b4531c 0%, transparent 60%), linear-gradient(170deg, #6e2f0c 0%, #a6481a 55%, #e8d9cc 120%);
 }
-.sms-card-art .disp { font-size: 26px; line-height: 1.1; }
-.sms-card-bar { position: absolute; top: 16px; left: 16px; width: 36px; height: 6px; border-radius: 3px; background: var(--red); }
-.sms-card-sub { font-size: 13px; color: #c9ccd1; font-family: Inter, sans-serif; }
+.sms-card-team { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 13px; line-height: 1.15; letter-spacing: 0.2px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+.sms-card-crest {
+  flex: none; width: 30px; height: 30px; border-radius: 8px; background: #fff; color: #a6481a; font-weight: 900; font-size: 17px;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.sms-card-body { font-weight: 700; font-size: 16px; line-height: 1.2; max-width: 88%; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.sms-card-bsn { position: absolute; right: 10px; bottom: 9px; width: 26px; height: 26px; border-radius: 50%; background: #fff; }
 .sms-card-meta { padding: 10px 13px 11px; }
 .sms-card-title { font-size: 14px; font-weight: 600; line-height: 1.25; }
 .sms-card-domain { font-size: 13px; color: #8e8e93; margin-top: 2px; }
@@ -325,3 +341,18 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .demo-star { flex: none; color: var(--red); margin-left: 5px; vertical-align: -1px; }
 .last-card.compact { padding: 10px 12px; gap: 12px; border-radius: 14px; }
 .last-card.compact .last-size { width: 42px; height: 42px; font-size: 18px; border-radius: 10px; }
+
+/* ── text scenario tabs (demo panel) ─────────────────────── */
+.demo-section { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-top: 4px; }
+.demo-tabs { display: flex; flex-direction: column; gap: 4px; margin-top: -6px; }
+.demo-tabs button {
+  display: flex; align-items: center; gap: 10px; text-align: left; font: inherit; font-size: 14.5px; font-weight: 600;
+  padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--ink); cursor: pointer;
+}
+.demo-tabs button:hover { background: #fff; }
+.demo-tabs button[aria-selected='true'] { background: var(--ink); color: #fff; }
+.demo-tab-n {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; font-size: 12px;
+  display: flex; align-items: center; justify-content: center; opacity: 0.7;
+}
+.demo-note { margin: -4px 0 0; font-size: 13px; line-height: 1.45; color: var(--muted); }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRoute } from './router.js';
-import { useStore, store } from './store.js';
+import { useStore, store, SCENARIOS, DEMO_TOKEN } from './store.js';
 import PhoneFrame from './components/PhoneFrame.jsx';
 import CoachDashboard from './screens/CoachDashboard.jsx';
 import AddPlayer from './screens/AddPlayer.jsx';
@@ -26,7 +26,6 @@ export default function App() {
   const data = useStore();
   const demo = [
     { label: 'Coach dashboard', href: '#/coach' },
-    { label: 'Text from BSN · what athletes get', href: '#/sms/jordan-x2p' },
     { label: 'Mia · parent of a 10-year-old', href: '#/r/mia-7kq' },
     { label: 'Jordan · says S, no size on file', href: '#/r/jordan-x2p' },
     { label: 'Dana · same as last year', href: '#/r/dana-a91' },
@@ -40,6 +39,24 @@ export default function App() {
           Coaches see the roster. Each athlete gets one link with five questions picked for them.
           Answers on a link show up on the coach dashboard live.
         </p>
+        <div className="demo-section">Texts to Jordan</div>
+        <div className="demo-tabs" role="tablist" aria-label="Text scenarios">
+          {SCENARIOS.map((sc, i) => (
+            <button
+              key={sc.id}
+              role="tab"
+              aria-selected={data.scenario === sc.id}
+              onClick={() => { store.scenario(sc.id); window.location.hash = `/sms/${DEMO_TOKEN}`; }}
+            >
+              <span className="demo-tab-n">{i + 1}</span>{sc.label}
+            </button>
+          ))}
+        </div>
+        <p className="demo-note">
+          {SCENARIOS.find((sc) => sc.id === data.scenario)?.note}{' '}
+          The reply buttons in the thread work, so you can carry on from here.
+        </p>
+        <div className="demo-section">Screens</div>
         <nav className="demo-links" aria-label="Demo shortcuts">
           {demo.map((d) => (
             <a key={d.href} href={d.href} className={`#${path}`.replace(/\/done.*/, '') === d.href ? 'on' : ''}>

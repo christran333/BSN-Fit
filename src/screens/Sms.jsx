@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { messagesFor, messageParts, threadTime } from '../messages.js';
-import { flowFor } from '../sizing.js';
+import { messagesFor, messageParts, threadTime, REPLIES } from '../messages.js';
+import { store } from '../store.js';
+import { go } from '../router.js';
 
 // iMessage-style screen: the text an athlete (or parent) gets from BSN.
 // Tapping the link or the preview card opens their fit check.
@@ -14,11 +15,16 @@ export default function Sms({ data, token }) {
   }, [count, token]);
   if (!p) return <div className="center-msg"><b>No text for this player.</b><a href="#/coach">Back to roster</a></div>;
 
-  const first = p.name.split(' ')[0];
   const msgs = messagesFor(p);
-  const isParent = flowFor(p) === 'parent';
   const href = `#/r/${p.token}`;
-  const coach = data.team.coach;
+  const { team } = data;
+  // quick replies only show under the newest BSN text, until they answer it
+  const lastIdx = msgs.length - 1;
+  const live = REPLIES[msgs[lastIdx]?.kind] && !(p.status === 'ready' || p.status === 'review') ? lastIdx : -1;
+  const tap = (r) => {
+    store.quickReply(p.id, r.id, r.label);
+    if (r.id === 'go') setTimeout(() => go(`/r/${p.token}`), 650);
+  };
 
   return (
     <div className="screen sms">
@@ -49,24 +55,34 @@ export default function Sms({ data, token }) {
               {showTime && (
                 <div className="sms-meta">{i === 0 && <><b>Text Message · SMS</b><br /></>}{threadTime(m.at)}</div>
               )}
-              <div className={`bubble${isNew ? ' is-new' : ''}`}>
+              <div className={`bubble${m.kind === 'reply' ? ' me' : ''}${isNew ? ' is-new' : ''}`}>
                 {lead}{link && <> <a href={href}>{link}</a></>}
                 {after && <><br /><br />{after}</>}
               </div>
               {m.kind === 'invite' && (
                 <a href={href} className="sms-card">
-                  <div className="sms-card-art" aria-hidden="true">
-                    <span className="sms-card-bar" />
-                    <span className="disp">Fit Check</span>
-                    <span className="sms-card-sub">{isParent ? `${first}'s uniform size` : `${first}'s jersey size`}</span>
+                  <div className="sms-card-art">
+                    <div className="sms-card-team">
+                      <span className="sms-card-crest" aria-hidden="true">E</span>
+                      <span>{team.school}<br />{team.program}</span>
+                    </div>
+                    <div className="sms-card-body">{team.coach} is requesting sizes for the {team.season} season.</div>
+                    <img className="sms-card-bsn" src={`${import.meta.env.BASE_URL}bsn-mark.png`} alt="BSN Sports" />
                   </div>
                   <div className="sms-card-meta">
-                    <div className="sms-card-title">{data.team.name}: {data.team.order}</div>
+                    <div className="sms-card-title">Fit Check · {team.order}</div>
                     <div className="sms-card-domain">fitcheck.team</div>
                   </div>
                 </a>
               )}
               {i === 0 && <div className="bubble small">Reply STOP to opt out.</div>}
+              {i === live && (
+                <div className="qr" role="group" aria-label="Quick replies">
+                  {REPLIES[m.kind].map((r) => (
+                    <button key={r.id} className="qr-btn" onClick={() => tap(r)}>{r.label}</button>
+                  ))}
+                </div>
+              )}
             </React.Fragment>
           );
         })}

@@ -6,7 +6,7 @@ import { Chips } from '../components/ui.jsx';
 
 export default function FitCheck({ data, token }) {
   const p = data.players.find((x) => x.token === token);
-  const [answers, setAnswers] = useState(() => (p ? { ...defaultAnswers(p), ...(p.answers || {}) } : {}));
+  const [answers, setAnswers] = useState(() => (p ? { ...defaultAnswers(p), ...(p.draft || {}), ...(p.answers || {}) } : {}));
 
   useEffect(() => { if (p) store.markOpened(p.id); }, [p?.id]);
 
@@ -15,7 +15,12 @@ export default function FitCheck({ data, token }) {
 
   const flow = flowFor(p);
   const first = p.name.split(' ')[0];
-  const set = (id) => (v) => setAnswers((a) => ({ ...a, [id]: v }));
+  const set = (id) => (v) => setAnswers((a) => {
+    const next = { ...a, [id]: v };
+    // keep their place, so a reminder can say how far along they are
+    store.saveDraft(p.id, next, questions.filter((q) => next[q.id] !== undefined).length);
+    return next;
+  });
   const answered = questions.filter((q) => answers[q.id] !== undefined).length;
   const complete = answered === questions.length;
   const live = answered >= 3 ? recommend(p, answers) : null;
@@ -27,8 +32,8 @@ export default function FitCheck({ data, token }) {
 
   const head = {
     parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}Five taps and you're done.</>, kicker: `${data.team.name} · for parents` },
-    teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. Five taps, about 30 seconds.</>, kicker: data.team.name },
-    standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About 30 seconds.', kicker: data.team.name },
+    teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. Five quick questions, about a minute.</>, kicker: data.team.name },
+    standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About a minute.', kicker: data.team.name },
     returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Nothing changed? Just hit submit.`, kicker: data.team.name },
   }[flow];
 

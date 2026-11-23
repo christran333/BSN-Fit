@@ -17,6 +17,18 @@ Open the deployed site on a phone or laptop. On a laptop it shows inside a phone
 | Jordan | Says she's an S, no size on file. Indirect fit questions catch that she needs an M |
 | Dana | Adult, same as last year. Answers are filled in, so it's one tap |
 
+### Text scenarios
+
+The demo panel's **Texts to Jordan** tabs rebuild Jordan's text thread up to each moment, so it reads as one conversation:
+
+1. **First text**: invite with link preview, then a follow-up that says what to expect (5 questions, about a minute, how many teammates are done)
+2. **Ignored it**: three days later, deadline reminder
+3. **Quit half-way**: answered 3 of 5; the text says 60% done, and the link resumes where she stopped
+4. **Remind me later**: she tapped it; this is the next day
+5. **After deadline**: order closed; offer to add her to the next batch
+
+The reply buttons in the thread work (RCS-style suggested replies), so you can click through from any tab. The coach's **Nudge** button sends the right follow-up for each player automatically. All text copy is in `src/messages.js`.
+
 Everything is saved in the browser (localStorage), so a submit on an athlete link shows up on the coach dashboard right away. Use **Reset demo data** to start over.
 
 ## Run locally

@@ -41,7 +41,7 @@ export default function Notice({ data }) {
         </span>
       </button>
       <div className="notice-caption">
-        What {first}{p.age < 13 ? "'s parent" : ''} sees{n.more > 0 ? ` · +${n.more} more sent` : ''} · tap to open
+        {n.caption ? `${n.caption} · ` : ''}What {first}{p.age < 13 ? "'s parent" : ''} sees{n.more > 0 ? ` · +${n.more} more sent` : ''} · tap to open
       </div>
     </div>
   );
