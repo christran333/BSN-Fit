@@ -30,7 +30,7 @@ export default function Result({ data, token }) {
       <div className="screen">
         <div className="center-msg">
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={28} width={1.6} /></div>
-          <h1 className="disp" style={{ margin: 0, fontSize: 28 }}>You're all set</h1>
+          <h1 className="disp h1" style={{ margin: 0 }}>You're all set</h1>
           <p className="lede" style={{ maxWidth: 280 }}>{data.team.coach} has {isParent ? `${first}'s` : 'your'} size. You can close this tab.</p>
           <button className="lnk" onClick={() => setDone(false)}>Change something</button>
         </div>
@@ -40,7 +40,7 @@ export default function Result({ data, token }) {
 
   return (
     <div className="screen">
-      <div className="screen-scroll" style={{ padding: '10px 16px 12px', gap: 12 }}>
+      <div className="screen-scroll">
         <div className="result-hero">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="sent"><i><Check size={11} width={2} /></i>Sent to {data.team.coach}</div>
@@ -80,7 +80,7 @@ export default function Result({ data, token }) {
               </div>
               <div className="opt">
                 <label className="ot" htmlFor="nt">Anything else we should know?</label>
-                <input className="input" id="nt" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. likes sleeves long, between sizes on top" style={{ height: 44, fontSize: 15 }} />
+                <input className="input" id="nt" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. likes sleeves long, between sizes on top" />
               </div>
               {changed && (
                 <div className="opt" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -95,7 +95,7 @@ export default function Result({ data, token }) {
         </div>
       </div>
       <div className="screen-foot" style={{ padding: '12px 16px 28px' }}>
-        <button className="btn btn-red" onClick={finish}>Done</button>
+        <button className="btn btn-primary" onClick={finish}>Done</button>
         <a className="lnk" style={{ textAlign: 'center' }} href={`#/r/${token}`}>Change my answers</a>
       </div>
     </div>

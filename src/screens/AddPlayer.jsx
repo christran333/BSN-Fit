@@ -47,26 +47,27 @@ export default function AddPlayer({ setup = false }) {
 
   return (
     <div className="screen">
-      <div className="screen-scroll" style={{ gap: 14 }}>
+      <div className="screen-scroll">
         <div>
           <Back href={back}>Roster</Back>
           <h1 className="disp h1">Add player</h1>
-          {setup && <p className="lede" style={{ marginTop: 6 }}>Nothing sends yet. You'll review everyone first.</p>}
+          {setup && <p className="lede">Nothing sends yet. You'll review everyone first.</p>}
         </div>
 
         <div className="field"><label htmlFor="nm">Player name</label><input id="nm" className="input" value={f.name} onChange={set('name')} placeholder="First and last" autoComplete="off" /></div>
 
-        <div className="grid2" style={{ gridTemplateColumns: '80px 80px minmax(0, 1fr)' }}>
+        <div className="grid2" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
           <div className="field"><label htmlFor="ag">Age</label><input id="ag" className="input" inputMode="numeric" value={f.age} onChange={(e) => setF((s) => ({ ...s, age: e.target.value.replace(/\D/g, '').slice(0, 2), lastSize: '' }))} /></div>
           <div className="field"><label htmlFor="no">Number</label><input id="no" className="input" inputMode="numeric" value={f.number} onChange={(e) => setF((s) => ({ ...s, number: e.target.value.replace(/\D/g, '').slice(0, 2) }))} /></div>
-          <div className="field"><span className="lb">Cut</span>
-            <div className="seg" role="group" aria-label="Cut">
-              {CUTS.map((c) => (
-                <button key={c.value} type="button" style={{ height: 40 }} aria-pressed={f.cut === c.value} onClick={() => set('cut')(c.value)}>
-                  {isKid && c.value !== 'unisex' ? (c.value === 'womens' ? 'Girls' : 'Boys') : c.label}
-                </button>
-              ))}
-            </div>
+        </div>
+
+        <div className="field"><span className="lb">Cut</span>
+          <div className="seg" role="group" aria-label="Cut">
+            {CUTS.map((c) => (
+              <button key={c.value} type="button" aria-pressed={f.cut === c.value} onClick={() => set('cut')(c.value)}>
+                {isKid && c.value !== 'unisex' ? (c.value === 'womens' ? 'Girls' : 'Boys') : c.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -107,7 +108,7 @@ export default function AddPlayer({ setup = false }) {
       </div>
 
       <div className="screen-foot">
-        <button className="btn btn-red" disabled={!ready} onClick={create}>{setup ? 'Add to roster' : 'Create link'}</button>
+        <button className="btn btn-primary" disabled={!ready} onClick={create}>{setup ? 'Add to roster' : 'Create link'}</button>
       </div>
     </div>
   );

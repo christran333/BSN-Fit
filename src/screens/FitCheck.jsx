@@ -25,7 +25,7 @@ export default function FitCheck({ data, token }) {
       <div className="screen white">
         <div className="center-msg" style={{ alignItems: 'flex-start', textAlign: 'left', justifyContent: 'flex-start', paddingTop: 28 }}>
           <div className="kicker">{data.team.name}</div>
-          <h1 className="disp" style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>
+          <h1 className="disp h1" style={{ margin: 0 }}>
             {p.nextBatch ? "You're on the list" : `Sizes closed on ${due}`}
           </h1>
           <p className="lede" style={{ margin: 0 }}>
@@ -37,7 +37,7 @@ export default function FitCheck({ data, token }) {
         </div>
         {!p.nextBatch && (
           <div className="screen-foot">
-            <button className="btn btn-red" onClick={() => store.joinNextBatch(p.id)}>Add {flow === 'parent' ? first : 'me'} to the next batch</button>
+            <button className="btn btn-primary" onClick={() => store.joinNextBatch(p.id)}>Add {flow === 'parent' ? first : 'me'} to the next batch</button>
           </div>
         )}
       </div>
@@ -68,7 +68,7 @@ export default function FitCheck({ data, token }) {
   const header = (
     <div>
       <div className="kicker">{head.kicker}</div>
-      <h1 className="disp" style={{ margin: '8px 0 0', fontSize: 26, lineHeight: 1.15 }}>{head.title}</h1>
+      <h1 className="disp h1">{head.title}</h1>
       <p className="lede">{head.lede}</p>
     </div>
   );
@@ -88,7 +88,7 @@ export default function FitCheck({ data, token }) {
 
   const foot = (
     <div className="screen-foot">
-      <button className="btn btn-red" style={flow === 'returning' ? { height: 56, fontSize: 17 } : null} disabled={!complete} onClick={() => submit(false)}>
+      <button className="btn btn-primary" disabled={!complete} onClick={() => submit(false)}>
         {flow === 'returning' && answers.changed === 'none' && live?.size === p.lastSize
           ? `Yep, same: submit ${live.size}`
           : complete ? 'Submit' : `Submit · ${answered} of ${questions.length}`}
@@ -105,7 +105,7 @@ export default function FitCheck({ data, token }) {
   if (flow === 'returning') {
     return (
       <div className="screen white">
-        <div className="screen-scroll" style={{ gap: 12 }}>
+        <div className="screen-scroll">
           {header}
           <div className="last-card compact">
             <div className="disp last-size">{p.lastSize}</div>

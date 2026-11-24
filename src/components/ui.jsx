@@ -6,11 +6,13 @@ export const Check = ({ size = 10, color = '#fff', width = 1.8 }) => (
   </svg>
 );
 
-export const Back = ({ href, children }) => (
+export const Back = ({ href, children = 'Back' }) => (
   <a href={href} className="back">
-    <svg width="8" height="12" viewBox="0 0 8 12" aria-hidden="true">
-      <path d="M6 1L1.5 6 6 11" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-    </svg>
+    <i aria-hidden="true">
+      <svg width="8" height="12" viewBox="0 0 8 12">
+        <path d="M6 1.5L1.8 6 6 10.5" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </i>
     {children}
   </a>
 );

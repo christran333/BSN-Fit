@@ -45,15 +45,13 @@ export default function CoachDashboard({ data }) {
 
   return (
     <div className="screen">
-      <div className="screen-scroll" style={{ padding: '10px 16px 12px', gap: 12 }}>
+      <div className="screen-scroll">
         <div className="coach-head">
-          <div>
-            <div className="team-name">{team.name}</div>
-            <h1 className="disp h1">{team.order}</h1>
-          </div>
-          <div style={{ paddingTop: 4 }}>
-            <div className="due-label">{closed ? 'Order closed' : 'Order due'}</div>
-            <div className="due">{closed ? due : `${due} · ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}</div>
+          <div className="team-name">{team.name}</div>
+          <h1 className="disp h1">{team.order}</h1>
+          <div className="due">
+            <i aria-hidden="true" />
+            {closed ? `Order closed ${due}` : `Order due ${due} · ${daysLeft} day${daysLeft === 1 ? '' : 's'} left`}
           </div>
         </div>
 
@@ -68,9 +66,9 @@ export default function CoachDashboard({ data }) {
           <div className="progress-top">
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <span className="disp progress-num">{ready.length + review.length}<span>/{players.length}</span></span>
-              <span style={{ fontSize: 14, color: '#c9ccd1' }}>fit checks in</span>
+              <span className="progress-cap">fit checks in</span>
             </div>
-            <button className="btn btn-red" style={{ height: 36, width: 'auto', padding: '0 14px', fontSize: 14, borderRadius: 10 }} onClick={nudgeAll} disabled={!waiting.length}>
+            <button className="btn-sm btn-sm-light" onClick={nudgeAll} disabled={!waiting.length}>
               {closed ? `Offer next batch · ${waiting.length}` : `Nudge ${waiting.length}`}
             </button>
           </div>
@@ -125,9 +123,9 @@ export default function CoachDashboard({ data }) {
         </div>
       </div>
 
-      <div className="screen-foot" style={{ flexDirection: 'row', gap: 10, padding: '10px 16px 28px' }}>
-        <a href="#/coach/add" className="btn btn-ink">
-          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" /></svg>
+      <div className="screen-foot">
+        <a href="#/coach/add" className="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
           Add player
         </a>
       </div>

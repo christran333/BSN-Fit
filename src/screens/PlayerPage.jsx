@@ -24,7 +24,7 @@ export default function PlayerPage({ data, id }) {
 
   return (
     <div className="screen">
-      <div className="screen-scroll" style={{ gap: 14 }}>
+      <div className="screen-scroll">
         <div>
           <Back href="#/coach">Roster</Back>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
@@ -49,8 +49,8 @@ export default function PlayerPage({ data, id }) {
             </div>
             {p.contact && <div className="help">Sent to {p.contact}{p.nudgedAt ? ` · nudged ${timeAgo(p.nudgedAt)}` : ''}</div>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-              <button className="btn btn-ghost" onClick={() => store.nudge(p.id)}>Nudge {first}</button>
-              <a className="btn btn-ghost" href={`#/sms/${p.token}`}>See the text</a>
+              <button className="btn btn-secondary" onClick={() => store.nudge(p.id)}>Nudge {first}</button>
+              <a className="btn btn-secondary" href={`#/sms/${p.token}`}>See the text</a>
             </div>
           </div>
         )}
@@ -59,8 +59,8 @@ export default function PlayerPage({ data, id }) {
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {p.status === 'review'
-                ? <span className="pill pill-amber" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.6 }}>Needs a look</span>
-                : <span className="pill pill-ink" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.6 }}>Ready</span>}
+                ? <span className="pill pill-amber">Needs a look</span>
+                : <span className="pill pill-ink">Ready</span>}
               <span style={{ fontSize: 13, color: 'var(--muted)' }}>Submitted {timeAgo(p.submittedAt)}</span>
             </div>
             {rec.statedSize && rec.statedSize !== p.finalSize ? (
@@ -106,16 +106,16 @@ export default function PlayerPage({ data, id }) {
         <div className="screen-foot" style={{ gap: 8 }}>
           {p.status === 'review' ? (
             <>
-              <button className="btn btn-red" onClick={() => { store.coachDecide(p.id, rec.size); showToast(`Ordering ${rec.size}`); }}>Order {rec.size}</button>
+              <button className="btn btn-primary" onClick={() => { store.coachDecide(p.id, rec.size); showToast(`Ordering ${rec.size}`); }}>Order {rec.size}</button>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
                 {rec.statedSize && rec.statedSize !== rec.size
-                  ? <button className="btn btn-ghost" onClick={() => { store.coachDecide(p.id, rec.statedSize); showToast(`Keeping ${rec.statedSize}`); }}>Keep {rec.statedSize}</button>
-                  : <button className="btn btn-ghost" onClick={() => { const i = ladder.indexOf(rec.size); const up = ladder[Math.min(i + 1, ladder.length - 1)]; store.coachDecide(p.id, up); showToast(`Ordering ${up}`); }}>Go one up</button>}
-                <button className="btn btn-ghost" onClick={() => showToast(`Message to ${first} opened`)}>Message {first}</button>
+                  ? <button className="btn btn-secondary" onClick={() => { store.coachDecide(p.id, rec.statedSize); showToast(`Keeping ${rec.statedSize}`); }}>Keep {rec.statedSize}</button>
+                  : <button className="btn btn-secondary" onClick={() => { const i = ladder.indexOf(rec.size); const up = ladder[Math.min(i + 1, ladder.length - 1)]; store.coachDecide(p.id, up); showToast(`Ordering ${up}`); }}>Go one up</button>}
+                <button className="btn btn-secondary" onClick={() => showToast(`Message to ${first} opened`)}>Message {first}</button>
               </div>
             </>
           ) : (
-            <a className="btn btn-ink" href="#/coach">Back to roster</a>
+            <a className="btn btn-primary" href="#/coach">Back to roster</a>
           )}
         </div>
       )}

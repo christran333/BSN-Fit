@@ -3,7 +3,7 @@ import { store } from '../store.js';
 import { go } from '../router.js';
 import { flowFor, sizeLabel, formatHeight, questionsFor } from '../sizing.js';
 import { messageText } from '../messages.js';
-import { initials } from '../components/ui.jsx';
+import { initials, Back } from '../components/ui.jsx';
 
 // First-time coach setup, two steps:
 //   1. the order: who it's for, whose name goes on the texts, when sizes are due
@@ -42,11 +42,11 @@ function OrderStep({ team }) {
 
   return (
     <div className="screen">
-      <div className="screen-scroll" style={{ gap: 14 }}>
+      <div className="screen-scroll">
         <div>
           <Steps n={1} />
-          <h1 className="disp h1" style={{ marginTop: 10 }}>Set up your order</h1>
-          <p className="lede" style={{ marginTop: 6 }}>Each player gets a text with their own link. This is what it'll say.</p>
+          <h1 className="disp h1">Set up your order</h1>
+          <p className="lede">Each player gets a text with their own link. This is what it'll say.</p>
         </div>
         <div className="field"><label htmlFor="sc">School or club</label><input id="sc" className="input" value={f.school} onChange={set('school')} /></div>
         <div className="field"><label htmlFor="pg">Team</label><input id="pg" className="input" value={f.program} onChange={set('program')} placeholder="e.g. Girls Varsity Basketball" /></div>
@@ -65,7 +65,7 @@ function OrderStep({ team }) {
         </div>
       </div>
       <div className="screen-foot">
-        <button className="btn btn-red" disabled={!ok} onClick={next}>Next: add your roster</button>
+        <button className="btn btn-primary" disabled={!ok} onClick={next}>Next: add your roster</button>
       </div>
     </div>
   );
@@ -80,15 +80,12 @@ function RosterStep({ data }) {
 
   return (
     <div className="screen">
-      <div className="screen-scroll" style={{ gap: 12 }}>
+      <div className="screen-scroll">
         <div>
-          <a href="#/coach/setup" className="back">
-            <svg width="8" height="12" viewBox="0 0 8 12" aria-hidden="true"><path d="M6 1L1.5 6 6 11" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" /></svg>
-            Order details
-          </a>
+          <Back href="#/coach/setup">Order details</Back>
           <Steps n={2} />
-          <h1 className="disp h1" style={{ marginTop: 10 }}>Add your roster</h1>
-          <p className="lede" style={{ marginTop: 6 }}>{team.name} · sizes due {due}</p>
+          <h1 className="disp h1">Add your roster</h1>
+          <p className="lede">{team.name} · sizes due {due}</p>
         </div>
 
         {!players.some((p) => p.lastSize) && (
@@ -127,7 +124,7 @@ function RosterStep({ data }) {
           })}
         </div>
 
-        <a href="#/coach/add?setup=1" className="btn btn-ghost">
+        <a href="#/coach/add?setup=1" className="btn btn-secondary">
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
           Add a player
         </a>
@@ -140,7 +137,7 @@ function RosterStep({ data }) {
         )}
       </div>
       <div className="screen-foot">
-        <button className="btn btn-red" disabled={!drafts.length} onClick={send}>
+        <button className="btn btn-primary" disabled={!drafts.length} onClick={send}>
           {drafts.length ? `Send ${drafts.length} link${drafts.length === 1 ? '' : 's'}` : 'Add players to send'}
         </button>
       </div>
