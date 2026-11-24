@@ -43,6 +43,8 @@ npm install
 npm run dev      # then open the printed URL; --host also lets you open it on your phone over Wi-Fi
 ```
 
+**Design feedback (Agentation):** a click-to-annotate toolbar sits bottom-right in `npm run dev`. On the deployed site it's hidden; open any page with `?annotate` to turn it on in that browser (`?annotate=off` hides it again). Click elements, write a note, copy the output and paste it to your AI agent.
+
 ## How the sizing works (`src/sizing.js`)
 
 1. **Which link?** `flowFor(player)`
