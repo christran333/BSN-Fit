@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { store } from '../store.js';
 import { shortSize, sizeLabel, questionsFor } from '../sizing.js';
 import { initials, timeAgo } from '../components/ui.jsx';
+import Sheet from '../components/Sheet.jsx';
+import AddOptions from '../components/AddOptions.jsx';
 
 const subFor = (p) => {
   if (p.status === 'review') return p.flagReason || p.rec?.flagReason || 'Needs a look';
@@ -22,6 +24,7 @@ const subFor = (p) => {
 export default function CoachDashboard({ data }) {
   const { team, players } = data;
   const [filter, setFilter] = useState('all');
+  const [adding, setAdding] = useState(false);
 
   const ready = players.filter((p) => p.status === 'ready');
   const review = players.filter((p) => p.status === 'review');
@@ -47,7 +50,6 @@ export default function CoachDashboard({ data }) {
     <div className="screen">
       <div className="screen-scroll">
         <div className="coach-head">
-          <div className="team-name">{team.name}</div>
           <h1 className="disp h1">{team.order}</h1>
           <div className="due">
             <i aria-hidden="true" />
@@ -124,11 +126,15 @@ export default function CoachDashboard({ data }) {
       </div>
 
       <div className="screen-foot">
-        <a href="#/coach/add" className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setAdding(true)}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
-          Add player
-        </a>
+          Add players
+        </button>
       </div>
+      <Sheet open={adding} onClose={() => setAdding(false)} title="Add players">
+        <p className="sheet-lede">New players get their text as soon as you add them.</p>
+        <AddOptions context="dashboard" showBsn={false} onPick={() => setAdding(false)} />
+      </Sheet>
     </div>
   );
 }

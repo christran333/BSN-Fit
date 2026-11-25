@@ -84,7 +84,6 @@ export function cardFor(p, team) {
   const first = p.name.split(' ')[0];
   const flow = flowFor(p);
   return {
-    kicker: `${team.school} · ${team.program}`,
     title: {
       parent: `${first}'s uniform size`,
       returning: `${first}, same as last year?`,

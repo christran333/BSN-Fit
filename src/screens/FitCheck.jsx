@@ -24,7 +24,6 @@ export default function FitCheck({ data, token }) {
     return (
       <div className="screen white">
         <div className="center-msg" style={{ alignItems: 'flex-start', textAlign: 'left', justifyContent: 'flex-start', paddingTop: 28 }}>
-          <div className="kicker">{data.team.name}</div>
           <h1 className="disp h1" style={{ margin: 0 }}>
             {p.nextBatch ? "You're on the list" : `Sizes closed on ${due}`}
           </h1>
@@ -59,16 +58,15 @@ export default function FitCheck({ data, token }) {
   };
 
   const head = {
-    parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}{questions.length === 4 ? 'Four' : 'Five'} taps and you're done.</>, kicker: data.team.name },
-    teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. {questions.length === 4 ? 'Four' : 'Five'} quick questions, about a minute.</>, kicker: data.team.name },
-    standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About a minute.', kicker: data.team.name },
-    returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Nothing changed? Just hit submit.`, kicker: data.team.name },
+    parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}{questions.length === 4 ? 'Four' : 'Five'} taps and you're done.</> },
+    teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. {questions.length === 4 ? 'Four' : 'Five'} quick questions, about a minute.</> },
+    standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About a minute.' },
+    returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Nothing changed? Just hit submit.` },
   }[flow];
 
   const header = (
     <div>
-      <div className="kicker">{head.kicker}</div>
-      <h1 className="disp h1">{head.title}</h1>
+      <h1 className="disp h1" style={{ marginTop: 0 }}>{head.title}</h1>
       <p className="lede">{head.lede}</p>
     </div>
   );

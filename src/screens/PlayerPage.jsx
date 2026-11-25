@@ -37,8 +37,7 @@ export default function PlayerPage({ data, id }) {
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div className="card-label">{meta.title}</div>
-                <div style={{ fontSize: 15, fontWeight: 600, marginTop: 4 }}>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>
                   {p.status === 'opened' ? 'Opened, not submitted yet' : 'Waiting for them to open it'}
                 </div>
               </div>

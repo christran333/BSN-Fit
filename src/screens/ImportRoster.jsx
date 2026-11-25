@@ -44,13 +44,18 @@ export default function ImportRoster({ data }) {
   const edit = (key, patch) => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch, unsure: patch.name || patch.number ? null : r.unsure } : r)));
   const remove = (key) => setRows((rs) => rs.filter((r) => r.key !== key));
   const missingAge = rows.filter((r) => !r.age).length;
-  const add = () => { store.addPlayers(rows); go('/coach/setup/roster'); };
+  const fromDashboard = job?.context === 'dashboard';
+  const back = fromDashboard ? '#/coach' : '#/coach/setup/roster';
+  const add = () => {
+    store.addPlayers(rows);
+    if (fromDashboard) { store.sendLinks(); go('/coach'); } else go('/coach/setup/roster');
+  };
 
   if (phase === 'none') {
     return (
       <div className="screen"><div className="center-msg">
         <b>Pick a file to import.</b>
-        <a className="btn-sm" href="#/coach/setup/roster">Back to roster</a>
+        <a className="btn-sm" href="#/coach">Back to roster</a>
       </div></div>
     );
   }
@@ -60,7 +65,7 @@ export default function ImportRoster({ data }) {
       <div className="screen">
         <div className="screen-scroll">
           <div>
-            <Back href="#/coach/setup/roster">Roster</Back>
+            <Back href={back}>Roster</Back>
             <h1 className="disp h1">{job.kind === 'photo' ? 'Reading your roster' : 'Opening your file'}</h1>
             <p className="lede">{job.kind === 'photo' ? 'Finding names, numbers, grades and sizes.' : job.file.name}</p>
           </div>
@@ -80,13 +85,13 @@ export default function ImportRoster({ data }) {
       <div className="screen">
         <div className="screen-scroll">
           <div>
-            <Back href="#/coach/setup/roster">Roster</Back>
+            <Back href={back}>Roster</Back>
             <h1 className="disp h1">We couldn't read that file</h1>
             <p className="lede">Use an Excel (.xlsx) or CSV file with one player per row and a header row, like Name, Number, Age, Size, Phone.</p>
           </div>
           <a className="btn btn-secondary" href={`${import.meta.env.BASE_URL}samples/roster-template.csv`} download>Download a template</a>
         </div>
-        <div className="screen-foot"><a className="btn btn-primary" href="#/coach/setup/roster">Back to roster</a></div>
+        <div className="screen-foot"><a className="btn btn-primary" href={back}>Back to roster</a></div>
       </div>
     );
   }
@@ -96,7 +101,7 @@ export default function ImportRoster({ data }) {
     <div className="screen">
       <div className="screen-scroll">
         <div>
-          <Back href="#/coach/setup/roster">Roster</Back>
+          <Back href={back}>Roster</Back>
           <h1 className="disp h1">Check your roster</h1>
           <p className="lede">
             {job.kind === 'photo'
@@ -135,7 +140,7 @@ export default function ImportRoster({ data }) {
       </div>
       <div className="screen-foot">
         <button className="btn btn-primary" disabled={!rows.length || missingAge > 0} onClick={add}>
-          {missingAge ? `Add an age for ${missingAge} player${missingAge === 1 ? '' : 's'}` : `Add ${rows.length} player${rows.length === 1 ? '' : 's'}`}
+          {missingAge ? `Add an age for ${missingAge} player${missingAge === 1 ? '' : 's'}` : `${fromDashboard ? 'Text' : 'Add'} ${rows.length} player${rows.length === 1 ? '' : 's'}`}
         </button>
       </div>
     </div>

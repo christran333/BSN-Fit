@@ -96,8 +96,7 @@ export default function AddPlayer({ setup = false }) {
         <div className="flow-card" aria-live="polite">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div className="flow-kicker">Their link will be</div>
-              <div style={{ fontWeight: 700, fontSize: 17, marginTop: 2 }}>{meta.title}</div>
+              <div style={{ fontWeight: 600, fontSize: 17 }}>{meta.title}</div>
             </div>
             <div style={{ textAlign: 'right', fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{questionsFor(draft).length} taps<br />{meta.time}</div>
           </div>

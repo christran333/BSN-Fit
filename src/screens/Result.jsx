@@ -72,10 +72,9 @@ export default function Result({ data, token }) {
     <div className="screen">
       <div className="screen-scroll result-scroll">
         <div className="result-hero-c">
-          <span className="sent-pill"><i><Check size={9} width={2.4} /></i>Sent to {data.team.coach}</span>
           <Jersey size={chosen} team={data.team.short} />
-          <div className="result-kicker">{isParent ? `${first} is set in` : "You're set in"}</div>
           <h1 className="disp result-big" key={chosen}>{sizeLabel(chosen, p.cut)}</h1>
+          <p className="result-sent"><i><Check size={8} width={2.4} /></i>Sent to {data.team.coach}</p>
           {custom ? (
             <p className="result-why">Got it. We'll ask {data.team.coach} to double-check, since your answers pointed to {rec.size}.</p>
           ) : rec.reasons.length > 0 ? (
@@ -86,10 +85,7 @@ export default function Result({ data, token }) {
         </div>
 
         <div className="pick-card">
-          <div className="pick-head">
-            <b>Not quite right?</b>
-            <span>Tap a size to change it</span>
-          </div>
+          <div className="pick-head"><b>Not quite right? Tap your size.</b></div>
           <div className="pick-row" role="radiogroup" aria-label="Your size">
             {sizes.map((s) => (
               <button key={s} role="radio" aria-checked={s === chosen} className={`pick${s === chosen ? ' on' : ''}`} onClick={() => choose(s)}>
@@ -102,7 +98,6 @@ export default function Result({ data, token }) {
         </div>
 
         <div className="help-card">
-          <div className="help-title">Help us get it right <span>Optional</span></div>
           <button className={`help-row${open === 'measure' ? ' open' : ''}`} onClick={() => toggle('measure')} aria-expanded={open === 'measure'}>
             <span className="help-ico" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><rect x="2.5" y="8" width="19" height="8" rx="2" /><path d="M7 8v3M11 8v4M15 8v3M19 8v4" /></svg>

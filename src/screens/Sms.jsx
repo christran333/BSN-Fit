@@ -94,7 +94,6 @@ export default function Sms({ data, token }) {
             return (
               <a href={href} className={`sms-card ${cls}`} key={it.key}>
                 <div className="sms-card-art">
-                  <span className="sms-card-kicker">{card.kicker}</span>
                   <span className="sms-card-title-big">{card.title}</span>
                   <span className="sms-card-foot">{card.foot}</span>
                 </div>
