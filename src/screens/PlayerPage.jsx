@@ -86,7 +86,7 @@ export default function PlayerPage({ data, id }) {
                 {rec.reasons.slice(0, 3).join('. ')}. Between sizes, we round up.
               </div>
             )}
-            {p.keepOriginal && <div className="li" style={{ color: 'var(--amber-ink)' }}>{first} asked to keep {rec.statedSize}.</div>}
+            {(p.wants || p.keepOriginal) && <div className="li" style={{ color: 'var(--amber-ink)' }}>{first} asked for {p.wants || rec.statedSize} instead.</div>}
             {p.note && <div style={{ background: 'var(--bg)', borderRadius: 12, padding: '10px 12px', fontSize: 14 }}><b>Note:</b> {p.note}</div>}
           </div>
         )}

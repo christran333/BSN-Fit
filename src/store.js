@@ -363,20 +363,22 @@ export const store = {
     });
     return rec;
   },
-  /** extras from the "not sure / add more info" section */
-  addExtras(id, { pitToPit, note, keepOriginal }) {
+  /** extras from the result screen: a size they'd rather have, a measurement, a note */
+  addExtras(id, { pitToPit, note, wants }) {
     const p = state.players.find((x) => x.id === id);
     const rec = recommend(p, p.answers, { pitToPit });
-    const flagged = rec.needsReview || !!note || !!keepOriginal;
+    const asked = wants && wants !== rec.size ? wants : null;
+    const flagged = rec.needsReview || !!note || !!asked;
     patchPlayer(id, {
       rec,
       pitToPit: pitToPit || null,
       note: note || null,
-      keepOriginal: !!keepOriginal,
+      wants: asked,
+      keepOriginal: false,
       finalSize: rec.size,
       status: flagged ? 'review' : 'ready',
-      flagReason: keepOriginal
-        ? `Wants ${rec.statedSize} · answers point to ${rec.size}`
+      flagReason: asked
+        ? `Asked for ${asked} · answers point to ${rec.size}`
         : note
           ? 'Left a note'
           : rec.flagReason,
