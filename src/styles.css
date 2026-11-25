@@ -422,7 +422,7 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .import-card div span { font-size: 14px; color: #7a7a7a; line-height: 1.35; }
 .import-go { flex: none; background: var(--ink); color: #fff; font-weight: 600; font-size: 15px; height: 40px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; }
 .flow-tag { flex: none; font-size: 13px; font-weight: 500; background: var(--fill-2); color: var(--ink-2); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
-.x-btn { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
+.x-btn { flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
 .x-btn:hover { background: var(--fill-2); }
 .pinfo .flow-tag { align-self: flex-start; margin-top: 6px; font-size: 12px; padding: 3px 10px; background: #fff; }
 
@@ -506,7 +506,7 @@ body { background: #e8e8e8; }
 .inum input { width: 2.2ch; color: #a3a3a3; }
 .flow-tag.warn { background: var(--amber-bg); color: var(--amber-ink); }
 .age-fix { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; height: 34px; padding: 0 4px 0 12px; border-radius: 999px; background: #fff; font-size: 14px; font-weight: 500; box-shadow: inset 0 0 0 1.5px var(--amber); align-self: flex-start; }
-.age-fix input { width: 3ch; font-size: 15px; font-weight: 600; }
+.age-fix input { width: 3ch; font-size: 16px; font-weight: 600; }
 .irow .pinfo { display: flex; flex-direction: column; }
 .irow .x-btn { margin-top: -4px; }
 .irow .psub { white-space: normal; line-height: 1.4; }
