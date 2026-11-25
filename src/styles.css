@@ -284,26 +284,35 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .sms-name { font-size: 11.5px; font-weight: 400; color: #000; display: flex; align-items: center; gap: 3px; letter-spacing: -0.1px; }
 .sms-name svg { color: #8e8e93; margin-top: 1px; }
 .sms-video { justify-self: end; color: #007aff; display: flex; margin-top: -16px; }
-.sms-thread { padding: 12px 14px 16px; gap: 6px; }
+.sms-thread { padding: 10px 16px 14px; gap: 0; }
 .sms-thread > * { flex-shrink: 0; }
-.sms-meta { text-align: center; font-size: 11.5px; color: #8e8e93; line-height: 1.35; margin: 4px 0 10px; }
+.sms-meta { text-align: center; font-size: 11.5px; color: #8e8e93; line-height: 1.35; margin: 14px 0 8px; }
+.sms-meta:first-child { margin-top: 4px; }
 .sms-meta b { font-weight: 600; }
+/* iOS bubbles: 17px SF, 2px apart inside a group, a tail on the last one */
 .bubble {
-  align-self: flex-start; max-width: 78%; background: #e9e9eb; color: #000; padding: 8px 13px; border-radius: 19px;
-  font-size: 16.5px; line-height: 1.3; position: relative; word-break: break-word;
+  position: relative; align-self: flex-start; max-width: 74%; margin-top: 2px; background: #e9e9eb; color: #000;
+  padding: 7px 12px 8px; border-radius: 18px; font-size: 17px; line-height: 22px; letter-spacing: -0.25px; word-break: break-word;
 }
-.bubble a { color: #007aff; text-decoration: underline; }
-.bubble.small { font-size: 15px; }
-.bubble.me { align-self: flex-end; background: #007aff; color: #fff; }
+.bubble.start, .sms-card.start { margin-top: 8px; }
+.sms-meta + .bubble, .sms-meta + .sms-card { margin-top: 0; }
+.bubble a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.bubble.me { align-self: flex-end; background: #34c759; color: #fff; }
 .bubble.me.is-new { transform-origin: bottom right; }
-/* RCS-style suggested replies under the newest text */
-.qr { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 2px; }
+.bubble.tail::before, .bubble.tail::after { content: ''; position: absolute; bottom: 0; height: 20px; }
+.bubble.them.tail::before { left: -7px; width: 20px; background: #e9e9eb; border-bottom-right-radius: 16px 14px; }
+.bubble.them.tail::after { left: -26px; width: 26px; background: #fff; border-bottom-right-radius: 10px; }
+.bubble.me.tail::before { right: -7px; width: 20px; background: #34c759; border-bottom-left-radius: 16px 14px; }
+.bubble.me.tail::after { right: -26px; width: 26px; background: #fff; border-bottom-left-radius: 10px; }
+.sms-delivered { align-self: flex-end; font-size: 11.5px; font-weight: 500; color: #8e8e93; margin: 3px 4px 0 0; }
+/* RCS suggested replies under the newest text */
+.qr { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
 .qr-btn {
-  border: 1.5px solid #007aff; background: #fff; color: #007aff; font: inherit; font-size: 15px; font-weight: 600;
-  height: 36px; padding: 0 15px; border-radius: 18px; cursor: pointer;
+  border: 1px solid #c7c7cc; background: #fff; color: #007aff; font: inherit; font-size: 15px; font-weight: 500;
+  height: 34px; padding: 0 14px; border-radius: 17px; cursor: pointer; letter-spacing: -0.2px;
 }
-.qr-btn:active { background: #e6f0ff; }
-.sms-card { align-self: flex-start; width: 78%; border-radius: 19px; overflow: hidden; background: #e9e9eb; text-decoration: none; color: #000; display: block; }
+.qr-btn:active { background: #f2f2f7; }
+.sms-card { align-self: flex-start; width: 74%; margin-top: 2px; border-radius: 18px; overflow: hidden; background: #e9e9eb; text-decoration: none; color: #000; display: block; }
 .sms-card-art {
   aspect-ratio: 1.91 / 1; background: var(--red); color: #fff; display: flex; flex-direction: column; justify-content: space-between;
   padding: 14px 16px 13px; position: relative; font-family: Inter, sans-serif;
@@ -312,12 +321,12 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .sms-card-title-big { font-size: 24px; font-weight: 800; line-height: 1.08; letter-spacing: -0.4px; }
 .sms-card-foot { font-size: 12.5px; font-weight: 600; opacity: 0.9; }
 .sms-card-meta { padding: 10px 13px 11px; }
-.sms-card-title { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.sms-card-title { font-size: 15px; font-weight: 600; line-height: 1.25; letter-spacing: -0.2px; }
 .sms-card-domain { font-size: 13px; color: #8e8e93; margin-top: 2px; }
 .sms-card:active { opacity: 0.85; }
 .sms-bar { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 12px 34px; }
 .sms-plus { width: 34px; height: 34px; border-radius: 50%; background: #e9e9eb; color: #8e8e93; display: flex; align-items: center; justify-content: center; flex: none; }
-.sms-input { flex: 1; height: 36px; border-radius: 18px; border: 1px solid #d1d1d6; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 14px; font-size: 16px; color: #b0b0b5; }
+.sms-input { flex: 1; height: 36px; border-radius: 18px; border: 1px solid #d1d1d6; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 14px; font-size: 17px; letter-spacing: -0.25px; color: #c4c4c6; }
 @media (max-width: 600px) {
   .sms-head { padding-top: max(10px, env(safe-area-inset-top)); }
   .sms-bar { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
@@ -403,7 +412,7 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .setup-steps span.on { background: var(--ink); }
 .setup-steps b { font-size: 16px; font-weight: 500; color: var(--ink); margin-left: 8px; }
 .setup-preview { background: #fff; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-.setup-preview .bubble { font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif; font-size: 15px; }
+.setup-preview .bubble { font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif; font-size: 15px; line-height: 20px; }
 .import-card {
   display: flex; align-items: center; gap: 12px; text-align: left; border: 0; font: inherit; color: var(--ink); cursor: pointer;
   background: var(--fill); border-radius: 24px; padding: 16px 16px 16px 20px;

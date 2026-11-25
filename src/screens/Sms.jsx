@@ -24,6 +24,24 @@ export default function Sms({ data, token }) {
   const liveReplies = !done && !p.nextBatch && !p.declined ? repliesFor(msgs[lastIdx], p) : null;
   const live = liveReplies ? lastIdx : -1;
   const card = cardFor(p, team);
+  // flatten the log into what iOS draws: timestamps, bubbles, the link card, quick replies
+  const items = [];
+  msgs.forEach((m, i) => {
+    const prev = msgs[i - 1];
+    if (!prev || new Date(m.at) - new Date(prev.at) > 15 * 60 * 1000) {
+      items.push({ type: 'time', key: `t${i}`, label: threadTime(m.at), first: i === 0 });
+    }
+    const { lead, link } = messageParts(p, team, m);
+    const side = m.kind === 'reply' ? 'me' : 'them';
+    const isNew = i === lastIdx && Date.now() - new Date(m.at) < 8000;
+    items.push({ type: 'bubble', key: `b${i}`, side, lead, link, isNew });
+    if (m.kind === 'invite') items.push({ type: 'card', key: `c${i}`, side: 'them' });
+    if (i === 0) items.push({ type: 'bubble', key: 'stop', side: 'them', lead: 'Reply STOP to opt out.' });
+    if (i === live) items.push({ type: 'qr', key: 'qr' });
+  });
+  const mine = items.filter((it) => it.side === 'me');
+  const lastMineKey = mine.length && items[items.length - 1] === mine[mine.length - 1] ? mine[mine.length - 1].key : null;
+
   const tap = (r) => {
     store.quickReply(p.id, r.id, r.label);
     if (r.id === 'go') setTimeout(() => go(`/r/${p.token}`), 650);
@@ -48,41 +66,51 @@ export default function Sms({ data, token }) {
       </header>
 
       <div className="screen-scroll sms-thread" ref={threadRef}>
-        {msgs.map((m, i) => {
-          const prev = msgs[i - 1];
-          const showTime = !prev || new Date(m.at) - new Date(prev.at) > 15 * 60 * 1000;
-          const { lead, link, after } = messageParts(p, data.team, m);
-          const isNew = i === msgs.length - 1 && Date.now() - new Date(m.at) < 8000;
-          return (
-            <React.Fragment key={`${m.kind}-${m.at}-${i}`}>
-              {showTime && (
-                <div className="sms-meta">{i === 0 && <><b>Text Message · SMS</b><br /></>}{threadTime(m.at)}</div>
-              )}
-              <div className={`bubble${m.kind === 'reply' ? ' me' : ''}${isNew ? ' is-new' : ''}`}>
-                {lead}{link && <> <a href={href}>{link}</a></>}
-                {after && <><br /><br />{after}</>}
+        {items.map((it, i) => {
+          if (it.type === 'time') {
+            const [day, ...rest] = it.label.split(' ');
+            return (
+              <div className="sms-meta" key={it.key}>
+                {it.first && <>Text Message • RCS<br /></>}
+                <b>{day}</b> {rest.join(' ')}
               </div>
-              {m.kind === 'invite' && (
-                <a href={href} className="sms-card">
-                  <div className="sms-card-art">
-                    <span className="sms-card-kicker">{card.kicker}</span>
-                    <span className="sms-card-title-big">{card.title}</span>
-                    <span className="sms-card-foot">{card.foot}</span>
-                  </div>
-                  <div className="sms-card-meta">
-                    <div className="sms-card-title">Fit Check from {team.coach}</div>
-                    <div className="sms-card-domain">fitcheck.team</div>
-                  </div>
-                </a>
-              )}
-              {i === 0 && <div className="bubble small">Reply STOP to opt out.</div>}
-              {i === live && (
-                <div className="qr" role="group" aria-label="Quick replies">
-                  {liveReplies.map((r) => (
-                    <button key={r.id} className="qr-btn" onClick={() => tap(r)}>{r.label}</button>
-                  ))}
+            );
+          }
+          if (it.type === 'qr') {
+            return (
+              <div className="qr" role="group" aria-label="Quick replies" key={it.key}>
+                {liveReplies.map((r) => (
+                  <button key={r.id} className="qr-btn" onClick={() => tap(r)}>{r.label}</button>
+                ))}
+              </div>
+            );
+          }
+          const next = items[i + 1];
+          const tail = !next || next.type !== 'bubble' && next.type !== 'card' || next.side !== it.side;
+          const prev = items[i - 1];
+          const start = !prev || prev.type === 'time' || prev.side !== it.side;
+          const cls = `${it.side}${tail ? ' tail' : ''}${start ? ' start' : ''}${it.isNew ? ' is-new' : ''}`;
+          if (it.type === 'card') {
+            return (
+              <a href={href} className={`sms-card ${cls}`} key={it.key}>
+                <div className="sms-card-art">
+                  <span className="sms-card-kicker">{card.kicker}</span>
+                  <span className="sms-card-title-big">{card.title}</span>
+                  <span className="sms-card-foot">{card.foot}</span>
                 </div>
-              )}
+                <div className="sms-card-meta">
+                  <div className="sms-card-title">Fit Check from {team.coach}</div>
+                  <div className="sms-card-domain">fitcheck.team</div>
+                </div>
+              </a>
+            );
+          }
+          return (
+            <React.Fragment key={it.key}>
+              <div className={`bubble ${cls}`}>
+                {it.lead}{it.link && <> <a href={href}>{it.link}</a></>}
+              </div>
+              {it.key === lastMineKey && <div className="sms-delivered">Delivered</div>}
             </React.Fragment>
           );
         })}
@@ -92,7 +120,7 @@ export default function Sms({ data, token }) {
         <span className="sms-plus">
           <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
         </span>
-        <span className="sms-input">Text Message
+        <span className="sms-input">Text Message • RCS
           <svg width="14" height="18" viewBox="0 0 14 18"><rect x="4" y="1" width="6" height="10" rx="3" fill="currentColor" /><path d="M1.5 8.5a5.5 5.5 0 0 0 11 0M7 14v3" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" /></svg>
         </span>
       </div>
