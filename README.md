@@ -30,7 +30,14 @@ The demo panel works like this: **pick who gets the text** (Jordan, Mia's parent
 
 **On file from last season** (Mia and Maya): *Size only* asks how much they've grown (5 questions). *Size + height* asks today's height and works out the growth from last season's height (4 questions).
 
-**Coach setup** is the first-time flow: order details (school, team, season, due date, the coach name that goes on the texts), then the roster (import last season's order from BSN, or add players with age, number, last size and last height), then send.
+**Coach setup** is the first-time flow: order details (school, team, season, due date, the coach name that goes on the texts), then the roster, then send. There are four ways to add players:
+
+- **Last season's order** from BSN (one tap, sizes included)
+- **Scan a roster photo**: a printed list or whiteboard. *The scan is simulated in this prototype*: it always returns the roster in `public/samples/roster-photo.jpg`, with one name and one number flagged to check. A real version would send the photo to an OCR / vision model.
+- **Upload a spreadsheet** (.xlsx or .csv), parsed for real. Columns are matched by what coaches call them (Player, Jersey #, Grade, DOB, Shirt size, Height, Parent cell…) and values are cleaned up ("Mitchell, Avery", "Sr" → 17, `5'9"` → 69 in, "Womens M" → M). Players missing an age get asked for one before they're added.
+- **Add one at a time**
+
+Every import lands on a *Check your roster* list where names and numbers can be fixed and rows removed. No file handy? The roster screen has a sample photo, a sample spreadsheet (`public/samples/eagles-roster.xlsx`) and a CSV template.
 
 **Their journey** jumps between that person's screens: Text › Fit check › Result › Coach view. Reply buttons in the thread work (RCS-style suggested replies). Dana can reply **Same as last year** and submit without opening the link. All text copy is in `src/messages.js`.
 

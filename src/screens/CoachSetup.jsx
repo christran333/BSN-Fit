@@ -4,6 +4,7 @@ import { go } from '../router.js';
 import { flowFor, sizeLabel, formatHeight, questionsFor } from '../sizing.js';
 import { messageText } from '../messages.js';
 import { initials, Back } from '../components/ui.jsx';
+import { setPending } from '../rosterImport.js';
 
 // First-time coach setup, two steps:
 //   1. the order: who it's for, whose name goes on the texts, when sizes are due
@@ -71,6 +72,66 @@ function OrderStep({ team }) {
   );
 }
 
+const ICONS = {
+  bsn: <path d="M4 7.5h16M4 12h16M4 16.5h10" />,
+  photo: <><rect x="3" y="6" width="18" height="14" rx="3" /><circle cx="12" cy="13" r="3.5" /><path d="M8.5 6l1.5-2.5h4L15.5 6" /></>,
+  sheet: <><rect x="4" y="3" width="16" height="18" rx="2.5" /><path d="M4 9h16M4 15h16M10 3v18" /></>,
+  hand: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" /></>,
+};
+const Icon = ({ k }) => (
+  <span className="addopt-ico" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{ICONS[k]}</svg>
+  </span>
+);
+const Chevron = () => (
+  <svg className="addopt-chev" width="8" height="13" viewBox="0 0 8 13" aria-hidden="true"><path d="M1.5 1.5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
+
+/** the ways a coach can add players: BSN history, a photo, a spreadsheet, or by hand */
+function AddOptions({ compact = false, showBsn = true }) {
+  const startImport = (kind, file) => { if (file) { setPending({ kind, file }); go('/coach/setup/import'); } };
+  const sample = async (kind) => {
+    const name = kind === 'photo' ? 'roster-photo.jpg' : 'eagles-roster.xlsx';
+    const blob = await (await fetch(`${import.meta.env.BASE_URL}samples/${name}`)).blob();
+    startImport(kind, new File([blob], name, { type: blob.type }));
+  };
+  const pick = (kind) => (e) => { startImport(kind, e.target.files?.[0]); e.target.value = ''; };
+  return (
+    <div className={`addopts${compact ? ' compact' : ''}`}>
+      {showBsn && (
+        <button className="addopt" onClick={() => store.importRoster()}>
+          <Icon k="bsn" />
+          <span className="addopt-txt"><b>Last season's order</b><span>From BSN: 12 players with sizes</span></span>
+          <span className="addopt-badge">Fastest</span>
+        </button>
+      )}
+      <label className="addopt">
+        <Icon k="photo" />
+        <span className="addopt-txt"><b>Scan a roster photo</b><span>A printed list or a whiteboard</span></span>
+        <Chevron />
+        <input type="file" accept="image/*" capture="environment" onChange={pick('photo')} hidden />
+      </label>
+      <label className="addopt">
+        <Icon k="sheet" />
+        <span className="addopt-txt"><b>Upload a spreadsheet</b><span>Excel or CSV from your team app</span></span>
+        <Chevron />
+        <input type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={pick('sheet')} hidden />
+      </label>
+      <a className="addopt" href="#/coach/add?setup=1">
+        <Icon k="hand" />
+        <span className="addopt-txt"><b>Add one at a time</b><span>Name, age, number and last size</span></span>
+        <Chevron />
+      </a>
+      {!compact && (
+        <p className="addopt-foot">
+          No file handy? Try a <button onClick={() => sample('photo')}>sample photo</button> or <button onClick={() => sample('sheet')}>sample spreadsheet</button>.
+          {' '}<a href={`${import.meta.env.BASE_URL}samples/roster-template.csv`} download>Get the template</a>
+        </p>
+      )}
+    </div>
+  );
+}
+
 function RosterStep({ data }) {
   const { team, players } = data;
   const drafts = players.filter((p) => p.status === 'draft');
@@ -88,17 +149,7 @@ function RosterStep({ data }) {
           <p className="lede">{team.name} · sizes due {due}</p>
         </div>
 
-        {!players.some((p) => p.lastSize) && (
-          <button className="import-card" onClick={() => store.importRoster()}>
-            <div>
-              <b>Use last season's order</b>
-              <span>BSN has your Fall 2025 order: 12 players with their sizes. Heights come in where you entered them.</span>
-            </div>
-            <span className="import-go">Import</span>
-          </button>
-        )}
-
-        {players.length === 0 && <div className="empty-note">No players yet. Import last season or add them one at a time.</div>}
+        {players.length === 0 && <AddOptions showBsn />}
 
         <div className="roster">
           {players.map((p) => {
@@ -124,10 +175,12 @@ function RosterStep({ data }) {
           })}
         </div>
 
-        <a href="#/coach/add?setup=1" className="btn btn-secondary">
-          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
-          Add a player
-        </a>
+        {players.length > 0 && (
+          <>
+            <div className="section-label">Add more</div>
+            <AddOptions showBsn={!players.some((p) => p.fromBsn)} compact />
+          </>
+        )}
 
         {example && (
           <div className="setup-preview">

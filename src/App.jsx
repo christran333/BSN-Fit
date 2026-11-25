@@ -9,6 +9,7 @@ import FitCheck from './screens/FitCheck.jsx';
 import Result from './screens/Result.jsx';
 import Sms from './screens/Sms.jsx';
 import CoachSetup from './screens/CoachSetup.jsx';
+import ImportRoster from './screens/ImportRoster.jsx';
 import Notice from './components/Notice.jsx';
 
 function screenFor(path, data) {
@@ -16,6 +17,7 @@ function screenFor(path, data) {
   if (path === '/coach' || path === '/') return <CoachDashboard data={data} />;
   if (path === '/coach/setup') return <CoachSetup data={data} step="order" />;
   if (path === '/coach/setup/roster') return <CoachSetup data={data} step="roster" />;
+  if (path === '/coach/setup/import') return <ImportRoster data={data} />;
   if (path.startsWith('/coach/add')) return <AddPlayer setup={path.includes('setup=1')} />;
   if ((m = path.match(/^\/coach\/p\/([^/]+)/))) return <PlayerPage key={m[1]} data={data} id={m[1]} />;
   if ((m = path.match(/^\/sms\/([^/]+)/))) return <Sms key={m[1]} data={data} token={m[1]} />;

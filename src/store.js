@@ -217,7 +217,7 @@ export const store = {
       const have = new Set(s.players.map((p) => p.token));
       const last = seed().players
         .filter((p) => !have.has(p.token))
-        .map((p) => ({ ...Object.fromEntries(keep.filter((k) => p[k] != null).map((k) => [k, p[k]])), lastHeight: HEIGHT_ON_FILE[p.token] ?? null, status: 'draft' }));
+        .map((p) => ({ ...Object.fromEntries(keep.filter((k) => p[k] != null).map((k) => [k, p[k]])), lastHeight: HEIGHT_ON_FILE[p.token] ?? null, status: 'draft', fromBsn: true }));
       s.players = [...s.players, ...last];
       return s;
     });
@@ -237,6 +237,31 @@ export const store = {
     });
   },
 
+  /** add a batch of draft players from a roster import (spreadsheet or photo) */
+  addPlayers(list) {
+    const yearAgo = new Date(Date.now() - 365 * 864e5).toISOString();
+    update((s) => {
+      const taken = new Set(s.players.map((p) => p.name.toLowerCase()));
+      list.forEach((r, i) => {
+        if (taken.has(r.name.toLowerCase())) return;
+        const kid = r.age < 13;
+        s.players.push({
+          id: `p${Date.now()}${i}`,
+          status: 'draft',
+          token: makeToken(r.name),
+          name: r.name,
+          number: r.number ?? null,
+          age: r.age,
+          cut: kid ? (r.cut === 'mens' ? 'boys' : 'girls') : r.cut || 'unisex',
+          lastSize: r.lastSize || null,
+          lastOrderDate: r.lastSize ? yearAgo : null,
+          lastHeight: r.lastSize && r.lastHeight ? r.lastHeight : null,
+          contact: r.contact || null,
+        });
+      });
+      return s;
+    });
+  },
   addPlayer(input, { draft = false } = {}) {
     const p = {
       id: `p${Date.now()}`,
