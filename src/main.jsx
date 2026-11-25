@@ -9,7 +9,7 @@ import './styles.css';
 const Agentation = lazy(() => import('agentation').then((m) => ({ default: m.Agentation })));
 
 function annotateEnabled() {
-  if (import.meta.env.DEV) return true;
+  if (import.meta.env.DEV || import.meta.env.VITE_ANNOTATE === '1') return true;
   try {
     const param = new URLSearchParams(window.location.search).get('annotate');
     if (param !== null) {
