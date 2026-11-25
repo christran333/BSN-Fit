@@ -3,7 +3,7 @@
 A mobile web app prototype for cutting sizing-related returns on team uniform orders.
 ATCM 4341 Experience Design, Fall 2026, with BSN Sports. Team: Chris Tran, Seulgi Kim, Dung Nguyen.
 
-- **Coaches** get a short dashboard on their phone: who has filled out their fit check, who needs a nudge, and whose answers don't match the size they picked.
+- **Coaches** get a short dashboard on their phone: who has filled out their fit check, who needs a reminder, and whose answers don't match the size they picked.
 - **Athletes** (or parents) get one personal link: one screen, five tap questions, submit. The questions depend on what we already know about them.
 
 ## Try it
@@ -12,7 +12,7 @@ Open the deployed site on a phone or laptop. On a laptop it shows inside a phone
 
 | Link | Scenario |
 |---|---|
-| Coach dashboard | Roster, progress, nudges, review queue, add a player |
+| Coach dashboard | Roster, progress, notify, review queue, add a player |
 | Mia | Parent of a 10-year-old who wore Youth M 15 months ago, so it asks about growth |
 | Jordan | Says she's an S, no size on file. Indirect fit questions catch that she needs an M |
 | Dana | Adult, same as last year. Answers are filled in, so it's one tap |
@@ -78,7 +78,7 @@ src/
   store.js             localStorage data + seed roster
   router.js            hash routes (#/coach, #/r/<token>)
   screens/
-    CoachDashboard.jsx roster + progress + nudges
+    CoachDashboard.jsx roster + progress + notify
     AddPlayer.jsx      add a player, preview the link they'll get
     PlayerPage.jsx     link status, or review answers + approve a size
     FitCheck.jsx       the one-screen athlete form

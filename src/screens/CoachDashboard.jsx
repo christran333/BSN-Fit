@@ -14,7 +14,7 @@ const subFor = (p) => {
   if (p.status === 'draft') return 'Link not sent yet';
   if (p.nextBatch) return 'Asked for the next batch';
   if (p.declined) return 'Said not now';
-  if (p.nudgedAt) return `Nudged ${timeAgo(p.nudgedAt)}`;
+  if (p.nudgedAt) return `Notified ${timeAgo(p.nudgedAt)}`;
   if (p.status === 'opened') return p.answersCount ? `${p.answersCount} of ${questionsFor(p).length} answered` : 'Opened · not submitted';
   return p.sentAt ? `Not opened · ${timeAgo(p.sentAt)}` : 'Not opened yet';
 };
@@ -69,7 +69,7 @@ export default function CoachDashboard({ data }) {
               <span className="progress-cap">fit checks in</span>
             </div>
             <button className="btn-sm btn-sm-light" onClick={nudgeAll} disabled={!waiting.length}>
-              {closed ? `Offer next batch · ${waiting.length}` : `Nudge ${waiting.length}`}
+              {closed ? `Offer next batch · ${waiting.length}` : `Notify ${waiting.length}`}
             </button>
           </div>
           <div className="bar" aria-hidden="true">
@@ -115,7 +115,7 @@ export default function CoachDashboard({ data }) {
                   className="btn-sm"
                   onClick={(e) => { e.preventDefault(); store.nudge(p.id); }}
                 >
-                  {closed ? 'Text' : 'Nudge'}
+                  {closed ? 'Text' : 'Notify'}
                 </button>
               )}
             </a>

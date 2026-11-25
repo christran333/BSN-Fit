@@ -14,7 +14,6 @@
 import { flowFor, sizeLabel, questionsFor, hasHeightOnFile } from './sizing.js';
 
 export const shortLink = (p) => `fitcheck.team/r/${p.token}`;
-export const MINUTE = 'about a minute';
 export const qCount = (p) => questionsFor(p).length;
 
 export function messagesFor(p) {
@@ -31,7 +30,7 @@ export const isClosed = (team) => new Date(team.dueDate) <= Date.now();
 const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 const num = (n) => words[n] ?? String(n);
 
-/** which follow-up the coach's "Nudge" sends for this player right now */
+/** which follow-up the coach's "Notify" sends for this player right now */
 export function nudgeKindFor(p, team) {
   if (isClosed(team)) return 'late';
   if (p.answersCount > 0 && p.status === 'opened') return 'partial';
@@ -72,10 +71,10 @@ export function ackFor(replyId, p, team) {
   const first = p.name.split(' ')[0];
   const parent = flowFor(p) === 'parent';
   switch (replyId) {
-    case 'later': return "No problem. We'll text you again tomorrow.";
-    case 'tomorrow': return `Got it. We'll text you tomorrow. Sizes still lock on ${fmtDue(team)}.`;
-    case 'batch': return `Done. ${parent ? first + ' is' : "You're"} on the list for the next batch. We'll text the link when it opens.`;
-    case 'notnow': return `Okay. If you change your mind, ${team.coach} can add ${parent ? first : 'you'} later.`;
+    case 'later': return "No problem! We'll text you tomorrow.";
+    case 'tomorrow': return "You got it! Talk tomorrow.";
+    case 'batch': return `Done! ${parent ? `${first}'s` : "You're"} on the list. We'll text you when it opens.`;
+    case 'notnow': return `No worries! ${team.coach} can add ${parent ? first : 'you'} later.`;
     default: return null;
   }
 }
@@ -100,10 +99,8 @@ export function cardFor(p, team) {
 export function messageParts(p, team, msg) {
   const first = p.name.split(' ')[0];
   const parent = flowFor(p) === 'parent';
-  // "Hi Jordan, you're…" / parents: "Hi! Mia is…"
-  const hey = (rest) => (parent ? `Hi! ${rest[0].toUpperCase()}${rest.slice(1)}` : `Hi ${first}, ${rest}`);
-  const hi = parent ? 'Hi!' : `Hi ${first},`;
-  const your = parent ? `${first}'s` : 'your';
+  // "Hey Jordan! You're…" / parents: "Hi! Mia's…"
+  const hey = (rest) => `${parent ? 'Hi!' : `Hey ${first}!`} ${rest[0].toUpperCase()}${rest.slice(1)}`;
   const due = fmtDue(team);
 
   switch (msg.kind) {
@@ -113,53 +110,43 @@ export function messageParts(p, team, msg) {
 
     case 'intro': {
       const st = msg.stats;
-      const proof = st && st.done > 0 ? `, and ${st.done} of ${st.total} teammates already have` : '';
-      const flow = flowFor(p);
+      const proof = st && st.done > 0 ? ` ${st.done} teammates already did!` : '';
       const last = p.lastSize ? sizeLabel(p.lastSize, p.cut) : null;
-      const QUESTIONS = qCount(p);
-      // height on file: we already know how much they've grown, so say so
-      const kid = hasHeightOnFile(p)
-        ? `${first} wore ${last} last time, and we have ${first}'s height from then, so we can work out the growth. We`
-        : last ? `${first} wore ${last} last time, and kids grow fast, so we` : 'We';
-      const teenWhy = hasHeightOnFile(p) ? "We have your height from then, so we'll work out the growth. We" : 'A year can change a lot. We';
+      const taps = `${qCount(p)} quick taps`;
       const lead = {
-        parent: `Hi! ${first}'s ${team.short} uniform order is coming together. ${kid}'ll ask ${QUESTIONS} quick questions to get the size right. Most parents finish in about a minute${proof}. Ready?`,
-        returning: `${hi} last season you wore ${last} and kept it. If nothing's changed, tap below and you're done. Want to double-check? It's ${QUESTIONS} quick taps.`,
-        teen: `${hi} you wore ${last} last season. ${teenWhy}'ll ask ${QUESTIONS} quick questions to get your size right. Most players finish in about a minute${proof}. Ready?`,
-        standard: `${hi} your ${team.short} jersey order is coming together. To get your size right, we'll ask ${QUESTIONS} quick questions. Most players finish in about a minute${proof}. Ready?`,
-      }[flow];
+        parent: hasHeightOnFile(p)
+          ? `We have ${first}'s height from last season, so it's just ${taps} and we'll do the math.${proof} Ready?`
+          : last
+            ? `${first} wore ${last} last time, but kids grow fast! Just ${taps} to check.${proof} Ready?`
+            : `Just ${taps}, about a minute.${proof} Ready?`,
+        returning: `You wore ${last} last season. Same again? Tap below and you're done.`,
+        teen: `You wore ${last} last season. Let's make sure it still fits. Just ${taps}.${proof} Ready?`,
+        standard: `Just ${taps} to nail your size.${proof} Ready?`,
+      }[flowFor(p)];
       return { lead, link: null, after: null };
     }
 
     case 'nudge': {
       const s = msg.stats;
       const d = msg.daysLeft ?? daysLeft(team);
+      const left = `${num(d)} day${d === 1 ? '' : 's'} left`;
       // only say "one of the last" when it's actually true
-      const last = s && s.left <= Math.ceil((s.total + 1) / 2);
-      const opener = last
-        ? hey(`${parent ? `${first} is` : "you're"} one of the last few players without a size.`)
-        : hey(`${team.coach} still needs ${your} size.`);
-      const effort = flowFor(p) === 'returning' ? 'If nothing changed, it\'s one tap.' : `It takes ${MINUTE}.`;
-      return {
-        lead: `${opener} Sizes lock on ${due}, ${num(d)} day${d === 1 ? '' : 's'} left. Want to finish now? ${effort}`,
-        link: shortLink(p),
-        after: null,
-      };
+      const lastFew = s && s.left <= Math.ceil((s.total + 1) / 2);
+      const opener = lastFew
+        ? hey(`${parent ? `${first}'s` : "you're"} one of the last few without a size.`)
+        : hey(`${team.coach} still needs ${parent ? `${first}'s` : 'your'} size.`);
+      const effort = flowFor(p) === 'returning' ? "It's one tap!" : 'Takes a minute!';
+      return { lead: `${opener} Sizes lock ${due}, ${left}. ${effort}`, link: shortLink(p), after: null };
     }
 
     case 'partial': {
       const answered = msg.answered ?? p.answersCount ?? 3;
       const left = qCount(p) - answered;
-      const pct = Math.round((answered / qCount(p)) * 100);
       if (left <= 0) {
-        return {
-          lead: `${hey(`${your} answers are saved, you just didn't hit submit.`)} Want to finish now? It's one tap.`,
-          link: shortLink(p),
-          after: null,
-        };
+        return { lead: `${hey('your answers are saved.')} Just hit submit!`, link: shortLink(p), after: null };
       }
       return {
-        lead: `${hey(`we're still waiting for ${your} size.`)} You're ${pct}% done, and the last ${num(left)} question${left === 1 ? '' : 's'} take${left === 1 ? 's' : ''} less than a minute. Want to finish now?`,
+        lead: `${hey(`${parent ? `${first}'s` : "you're"} ${num(left)} question${left === 1 ? '' : 's'} from done.`)} Finish up?`,
         link: shortLink(p),
         after: null,
       };
@@ -167,14 +154,14 @@ export function messageParts(p, team, msg) {
 
     case 'reminder':
       return {
-        lead: `${hey('just a reminder to send')} ${your} uniform size to ${team.coach} for ${team.season} ${team.program}. It only takes ${MINUTE}. Ready to start?`,
+        lead: `${hey(`here's your reminder${parent ? ` for ${first}'s size` : ''}.`)} ${flowFor(p) === 'returning' ? "It's one tap!" : 'Takes a minute!'}`,
         link: shortLink(p),
         after: null,
       };
 
     case 'late':
       return {
-        lead: `${hey('sizes for this order closed on')} ${due}. We can still add ${parent ? first : 'you'} to the next batch so ${parent ? "they're" : "you're"} covered. Want us to do that?`,
+        lead: `${hey(`sizes closed ${due}, but we can add ${parent ? first : 'you'} to the next batch.`)} Want in?`,
         link: null,
         after: null,
       };
@@ -182,8 +169,8 @@ export function messageParts(p, team, msg) {
     case 'confirm':
       return {
         lead: parent
-          ? `Thanks! ${first}'s size (${sizeLabel(msg.size, p.cut)}) is in. ${team.coach} will see it with the team order.`
-          : `Thanks, ${first}! Your size (${sizeLabel(msg.size, p.cut)}) is in. ${team.coach} will see it with the team order.`,
+          ? `Thanks! ${first}'s all set in ${sizeLabel(msg.size, p.cut)}. 🙌`
+          : `Got it, ${first}! You're all set in ${sizeLabel(msg.size, p.cut)}. 🙌`,
         link: null,
         after: null,
       };
@@ -191,8 +178,8 @@ export function messageParts(p, team, msg) {
     default: // invite
       return {
         lead: parent
-          ? `${team.coach} is asking for ${first}'s ${team.season} uniform size for ${team.school} ${team.program}.`
-          : `${team.coach} is asking for your ${team.season} uniform size for ${team.school} ${team.program}.`,
+          ? `Hi! 👋 ${team.coach} needs ${first}'s ${team.season} uniform size.`
+          : `Hey ${first}! 👋 ${team.coach} needs your ${team.season} jersey size.`,
         link: shortLink(p),
         after: null,
       };

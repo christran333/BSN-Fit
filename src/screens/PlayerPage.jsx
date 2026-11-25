@@ -47,9 +47,9 @@ export default function PlayerPage({ data, id }) {
               <code>{linkFor(p.token).replace(/^https?:\/\//, '')}</code>
               <button className="btn-sm" onClick={async () => showToast((await copy(linkFor(p.token))) ? 'Link copied' : 'Could not copy')}>Copy</button>
             </div>
-            {p.contact && <div className="help">Sent to {p.contact}{p.nudgedAt ? ` · nudged ${timeAgo(p.nudgedAt)}` : ''}</div>}
+            {p.contact && <div className="help">Sent to {p.contact}{p.nudgedAt ? ` · notified ${timeAgo(p.nudgedAt)}` : ''}</div>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-              <button className="btn btn-secondary" onClick={() => store.nudge(p.id)}>Nudge {first}</button>
+              <button className="btn btn-secondary" onClick={() => store.nudge(p.id)}>Notify {first}</button>
               <a className="btn btn-secondary" href={`#/sms/${p.token}`}>See the text</a>
             </div>
           </div>
