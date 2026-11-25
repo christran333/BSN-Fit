@@ -43,12 +43,12 @@ export default function FitCheck({ data, token }) {
       </div>
     );
   }
-  const set = (id) => (v) => setAnswers((a) => {
-    const next = { ...a, [id]: v };
+  const set = (id) => (v) => {
+    const next = { ...answers, [id]: v };
+    setAnswers(next);
     // keep their place, so a reminder can say how far along they are
     store.saveDraft(p.id, next, questions.filter((q) => next[q.id] !== undefined).length);
-    return next;
-  });
+  };
   const answered = questions.filter((q) => answers[q.id] !== undefined).length;
   const complete = answered === questions.length;
   const live = answered >= 3 ? recommend(p, answers) : null;
@@ -59,7 +59,7 @@ export default function FitCheck({ data, token }) {
   };
 
   const head = {
-    parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}{questions.length === 4 ? 'Four' : 'Five'} taps and you're done.</>, kicker: `${data.team.name} · for parents` },
+    parent: { title: `${first}'s uniform size`, lede: <>{p.lastSize ? <>{first} wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. </> : null}{questions.length === 4 ? 'Four' : 'Five'} taps and you're done.</>, kicker: data.team.name },
     teen: { title: `Hey ${first}, check your fit`, lede: <>You wore <b>{sizeLabel(p.lastSize, p.cut)}</b> last season. {questions.length === 4 ? 'Four' : 'Five'} quick questions, about a minute.</>, kicker: data.team.name },
     standard: { title: `Hey ${first}, lock in your fit`, lede: 'The whole team does this, even if you know your size. Jerseys fit differently by brand. About a minute.', kicker: data.team.name },
     returning: { title: `Same as last season, ${first}?`, lede: `We filled this in from your last order. Nothing changed? Just hit submit.`, kicker: data.team.name },
@@ -93,11 +93,13 @@ export default function FitCheck({ data, token }) {
           ? `Yep, same: submit ${live.size}`
           : complete ? 'Submit' : `Submit · ${answered} of ${questions.length}`}
       </button>
-      <div className="foot-links">
-        <button className="lnk" disabled={!complete} style={{ opacity: complete ? 1 : 0.45 }} onClick={() => submit(true)}>Not sure about this size?</button>
-        <span aria-hidden="true">·</span>
-        <button className="lnk" disabled={!complete} style={{ opacity: complete ? 1 : 0.45 }} onClick={() => submit(true)}>Add more info</button>
-      </div>
+      {complete && (
+        <div className="foot-links">
+          <button className="lnk" onClick={() => submit(true)}>Not sure about this size?</button>
+          <span aria-hidden="true">·</span>
+          <button className="lnk" onClick={() => submit(true)}>Add more info</button>
+        </div>
+      )}
     </div>
   );
 
@@ -110,8 +112,8 @@ export default function FitCheck({ data, token }) {
           <div className="last-card compact">
             <div className="disp last-size">{p.lastSize}</div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 16 }}>{sizeLabel(p.lastSize, p.cut)} · last order</div>
-              <div style={{ fontSize: 13, color: '#c9ccd1', marginTop: 2 }}>
+              <div className="last-title">{sizeLabel(p.lastSize, p.cut)} · last order</div>
+              <div className="last-sub">
                 {p.lastOrderDate ? new Date(p.lastOrderDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : ''} · kept, not returned
               </div>
             </div>

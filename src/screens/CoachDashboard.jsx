@@ -15,8 +15,8 @@ const subFor = (p) => {
   if (p.nextBatch) return 'Asked for the next batch';
   if (p.declined) return 'Said not now';
   if (p.nudgedAt) return `Nudged ${timeAgo(p.nudgedAt)}`;
-  if (p.status === 'opened') return p.answersCount ? `Opened · ${p.answersCount} of ${questionsFor(p).length} answered` : 'Opened · not submitted';
-  return p.sentAt ? `Link sent ${timeAgo(p.sentAt)} · not opened` : 'Link not opened yet';
+  if (p.status === 'opened') return p.answersCount ? `${p.answersCount} of ${questionsFor(p).length} answered` : 'Opened · not submitted';
+  return p.sentAt ? `Not opened · ${timeAgo(p.sentAt)}` : 'Not opened yet';
 };
 
 export default function CoachDashboard({ data }) {
@@ -31,10 +31,10 @@ export default function CoachDashboard({ data }) {
   const due = new Date(team.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   const tabs = [
-    { id: 'all', label: `All ${players.length}` },
-    { id: 'review', label: `Needs look ${review.length}` },
-    { id: 'waiting', label: `Waiting ${waiting.length}` },
-    { id: 'ready', label: `Ready ${ready.length}` },
+    { id: 'all', label: 'All', n: players.length },
+    { id: 'review', label: 'Review', n: review.length },
+    { id: 'waiting', label: 'Waiting', n: waiting.length },
+    { id: 'ready', label: 'Ready', n: ready.length },
   ];
   const order = { review: 0, opened: 1, waiting: 2, draft: 2.5, ready: 3 };
   const shown = (filter === 'all' ? players : filter === 'waiting' ? waiting : players.filter((p) => p.status === filter))
@@ -79,14 +79,14 @@ export default function CoachDashboard({ data }) {
           </div>
           <div className="legend">
             <span><i style={{ background: '#fff' }} />{ready.length} ready</span>
-            <span><i style={{ background: 'var(--amber)' }} />{review.length} need a look</span>
+            {review.length > 0 && <span><i style={{ background: 'var(--amber)' }} />{review.length} need a look</span>}
             <span><i style={{ background: '#6b7079' }} />{waiting.length} waiting</span>
           </div>
         </div>
 
         <div className="seg" role="group" aria-label="Filter roster">
           {tabs.map((t) => (
-            <button key={t.id} aria-pressed={filter === t.id} onClick={() => setFilter(t.id)}>{t.label}</button>
+            <button key={t.id} aria-pressed={filter === t.id} onClick={() => setFilter(t.id)}>{t.label}<span className="seg-n">{t.n}</span></button>
           ))}
         </div>
 

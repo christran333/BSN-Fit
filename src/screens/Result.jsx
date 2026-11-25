@@ -56,15 +56,15 @@ export default function Result({ data, token }) {
           <p className="result-why">When you're between sizes, we round up. A little roomy is easier to live with than too tight.</p>
         </div>
 
-        <div className="card" style={{ padding: '6px 18px 4px', gap: 0 }}>
+        <div className="card" style={{ padding: '8px 20px 6px', gap: 0 }}>
           <button
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             style={{ border: 0, background: 'none', padding: '12px 0 10px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}
           >
             <div>
-              <div style={{ fontWeight: 700, fontSize: 17 }}>Not sure? Help us get it right</div>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>Optional. Your coach sees whatever you add.</div>
+              <div style={{ fontWeight: 600, fontSize: 17, letterSpacing: '-0.01em' }}>Not sure? Help us get it right</div>
+              <div style={{ fontSize: 14, color: '#7a7a7a', marginTop: 3 }}>Optional. Your coach sees whatever you add.</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 10 10" aria-hidden="true" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M2 3.5l3 3 3-3" stroke="#111316" strokeWidth="1.6" fill="none" strokeLinecap="round" /></svg>
           </button>
@@ -73,7 +73,7 @@ export default function Result({ data, token }) {
               <div className="opt">
                 <div><div className="ot">Measure a shirt that fits {isParent ? first : 'you'} well</div><div className="os">Lay it flat. Measure straight across from armpit to armpit.</div></div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input className="input" aria-label="Armpit to armpit, inches" inputMode="decimal" value={pit} onChange={(e) => setPit(e.target.value.replace(/[^\d.]/g, '').slice(0, 4))} placeholder="—" style={{ width: 80, textAlign: 'center', height: 44 }} />
+                  <input className="input" aria-label="Armpit to armpit, inches" inputMode="decimal" value={pit} onChange={(e) => setPit(e.target.value.replace(/[^\d.]/g, '').slice(0, 4))} placeholder="—" style={{ width: 88, textAlign: 'center' }} />
                   <span style={{ fontSize: 14, color: '#3f434a' }}>inches</span>
                   {pitNum > 0 && <span className="tag" style={{ marginLeft: 'auto' }}>Fits {sizeForMeasurement(p, pitNum)}</span>}
                 </div>
@@ -94,7 +94,7 @@ export default function Result({ data, token }) {
           )}
         </div>
       </div>
-      <div className="screen-foot" style={{ padding: '12px 16px 28px' }}>
+      <div className="screen-foot">
         <button className="btn btn-primary" onClick={finish}>Done</button>
         <a className="lnk" style={{ textAlign: 'center' }} href={`#/r/${token}`}>Change my answers</a>
       </div>
