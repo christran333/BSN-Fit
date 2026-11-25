@@ -91,9 +91,14 @@ const Chevron = () => (
 function AddOptions({ compact = false, showBsn = true }) {
   const startImport = (kind, file) => { if (file) { setPending({ kind, file }); go('/coach/setup/import'); } };
   const sample = async (kind) => {
-    const name = kind === 'photo' ? 'roster-photo.jpg' : 'eagles-roster.xlsx';
-    const blob = await (await fetch(`${import.meta.env.BASE_URL}samples/${name}`)).blob();
-    startImport(kind, new File([blob], name, { type: blob.type }));
+    // the .csv copy is for hosts that can't serve .xlsx
+    const names = kind === 'photo' ? ['roster-photo.jpg'] : ['eagles-roster.xlsx', 'eagles-roster.csv'];
+    for (const name of names) {
+      const res = await fetch(`${import.meta.env.BASE_URL}samples/${name}`).catch(() => null);
+      if (!res?.ok) continue;
+      const blob = await res.blob();
+      return startImport(kind, new File([blob], name, { type: name.endsWith('.csv') ? 'text/csv' : blob.type }));
+    }
   };
   const pick = (kind) => (e) => { startImport(kind, e.target.files?.[0]); e.target.value = ''; };
   return (
